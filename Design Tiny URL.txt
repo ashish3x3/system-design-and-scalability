@@ -1,0 +1,447 @@
+
+
+Design a service like TinyUrl
+https://www.youtube.com/watch?v=fMZMm_0ZhK4
+
+https://github.com/FreemanZhang/system-design/blob/master/tinyURL.md
+
+**********************
+https://www.educative.io/collection/page/5668639101419520/5649050225344512/5668600916475904
+
+50 * 1000000000 * 1000 * 500 bytes = 15* 10^15 bytes = 15 * 10^12 KB = 15TB
+50 Billion = 50 * 10^9 KB = 50 * 10^12 bytes
+0.2 * 1.7 * 10^12 bytes * 500 byts = 2*17*5*10^12 bytes = 170*10^12 bytes = 170*10^9 KB = 170 GB
+64^6 = 68719476736 = 64.7 *10^9 = 68.7 billion
+64^8 = 2.8147498e+14 = 281 * 10^12 = 281 trillion
+Now any number from 0 to 3.5 trillion can be represented by 43 bits... 2^43 ~= 8.796093e+12
+
+1. Requirements and Goals of the System
+	* Functional Requirements:
+		Given a URL, our service should generate a shorter and unique alias of it.
+		When users access a shorter URL, our service should redirect them to the original link.
+		Users should optionally be able to pick a custom alias for their URL.
+		Links will expire after a specific timespan automatically; users should also be able to specify expiration time.
+	* Non-Functional Requirements:
+		The system should be highly available. This is required because if our service is down, all the URL redirections will start failing.
+		URL redirection should happen in real-time with minimum latency.
+		Shortened links should not be guessable (not predictable).
+	* Extended Requirements:
+		Analytics, e.g., how many times a redirection happened?
+		Our service should also be accessible through REST APIs by other services.
+
+2. Capacity Estimation and Constraints
+	# Traffic estimates: New URLs shortenings per second: 500 million / (30 days * 24 hours * 3600 seconds) ~= 200 URLs/s
+	URLs redirections per second:50 billion / (30 days * 24 hours * 3600 sec) ~= 19K/s
+	## Storage estimates:500M new URLs every month for 5yrs = 500 million * 5 years * 12 months = 30 billion
+	each object we are storing can be of 500 bytes = 30 billion * 500 bytes = 15 TB
+	### Bandwidth estimates:since every second we expect 200 new URLs,total incoming data = 200 * 500 bytes = 100 KB/s
+	For read requests, since every second we expect ~19K URLs redirections,total outgoing data for our service = 19K * 500 bytes ~= 9 MB/s
+	#### Memory estimates: we follow the 80-20 rule o cache some of the hot URLs,20% of URLs generating 80% of traffic = 19K requests per second, so per day  = 19K * 3600 seconds * 24 hours ~= 1.7 billion
+	To cache 20% of these requests = 0.2 * 1.7 billion * 500 bytes ~= 170GB
+
+3. System APIs
+	creatURL(api_dev_key, original_url, custom_alias=None user_name=None, expire_date=None)
+	deleteURL(api_dev_key, url_key)
+	we can limit users through their api_dev_key, how many URL they can create or access in a certain time.throttle users based on their allocated quota
+
+4. Database Design
+	What kind of database should we use? = we are likely going to store billions of rows and we don’t need to use relationships between objects – a NoSQL key-value store like Dynamo or Cassandra is a better choice, which would also be easier to scale
+	Table: User(PK=userId) and Url(PK=hash:varchar(16))
+
+5. Basic System Design and Algorithm
+	a. Encoding actual URL
+		We can compute a unique hash (e.g., MD5(produce a 128-bit hash value) or SHA256, etc.) of the given URL. The hash can then be encoded for displaying. This encoding could be base36 ([a-z ,0-9]) or base62 ([A-Z, a-z, 0-9]) and if we add ‘-’ and ‘.’, we can use base64 encodin.what should be the length of the short key? 6, 8 or 10 characters?Using base64 encoding, a 6 letter long key would result in 64^6 ~= 68.7 billion possible strings,an 8 letter long key would result in 64^8 ~= 281 trillion possible strings
+
+	b. Generating keys offline = We can have a standalone Key Generation Service (KGS) that generates random six letter strings beforehand and stores them in a database (let’s call it key-DB). Whenever we want to shorten a URL, we will just take one of the already generated keys and use it. This approach will make things quite simple and fast since we will not be encoding the URL or worrying about duplications or collisions. KGS will make sure all the keys inserted in key-DB are unique.
+
+	* Can concurrency cause problems?we might get a scenario where two or more servers try to read the same key from the database. How can we solve this concurrency problem?KGS can use two tables to store keys, one for keys that are not used yet and one for all the used keys. As soon as KGS gives keys to one of the servers, it can move them to the used keys table. KGS can always keep some keys in memory so that whenever a server needs them, it can quickly provide them. For simplicity, as soon as KGS loads some keys in memory, it can move them to used keys table.KGS also has to make sure not to give the same key to multiple servers. For that, it must synchronize (or get a lock to) the data structure holding the keys before removing keys from it and giving them to a server.
+	What would be the key-DB size?  = 6 (characters per key) * 68.7B (unique keys) => 412 GB.
+
+	* Isn’t KGS the single point of failure? =  we can have a standby replica of KGS, and whenever the primary server dies, it can take over to generate and provide keys.
+
+	* Can each app server cache some keys from key-DB? = Yes, this can surely speed things up. Although in this case, if the application server dies before consuming all the keys, we will end up losing those keys. This could be acceptable since we have 68B unique six letters keys.
+
+	* How would we perform a key lookup? = can look up the key in our database or key-value store to get the full URL.present, issue a “HTTP 302 Redirect” status back to the browser, passing the stored URL in the “Location” field of the request.not present in our system, issue a “HTTP 404 Not Found”
+
+	* Should we impose size limits on custom aliases? = Since our service supports custom aliases, users can pick any ‘key’ they like, but providing a custom alias is not mandatory. However, it is reasonable (and often desirable) to impose a size limit on a custom alias, so that we have a consistent URL database. Let’s assume users can specify maximum 16 characters long customer key (as reflected in the above database schema).
+
+6. Data Partitioning and Replication
+	a. Range Based Partitioning: URLs starting with letter ‘A’ in one partition and those that start with letter ‘B’ into another partition . The main problem with this approach is that it can lead to unbalanced servers, for instance; if we decide to put all URLs starting with letter ‘E’ into a DB partition, but later we realize that we have too many URLs that start with letter ‘E’, which we can’t fit into one DB partition.
+
+	b. Hash-Based Partitioning: Our hashing function will randomly distribute URLs into different partitions, e.g., our hashing function can always map any key to a number between [1…256], and this number would represent the partition to store our object.This approach can still lead to overloaded partitions, which can be solved by using Consistent Hashing.
+
+7. Cache
+	* How much cache should we have? As estimated above we need 170GB memory to cache 20% of daily traffic since a modern day server can have 256GB memory, we can easily fit all the cache into one machine, or we can choose to use a couple of smaller servers to store all these hot URLs.
+
+	* Which cache eviction policy would best fit our needs? Least Recently Used (LRU) can be a reasonable policy for our system.We can use a Linked Hash Map or a similar data structure to store our URLs and Hashes, which will also keep track of which URLs are accessed recently.we can replicate our caching servers to distribute load between them To further increase the efficiency.
+
+	* How can each cache replica be updated? Whenever there is a cache miss, our servers would be hitting backend database. Whenever this happens, we can update the cache and pass the new entry to all the cache replicas. Each replica can update their cache by adding the new entry. If a replica already has that entry, it can simply ignore it.
+
+8. Load Balancer (LB)
+	Between Clients and Application servers
+	Between Application Servers and database servers
+	Between Application Servers and Cache servers
+	A problem with Round Robin LB is, it won’t take server load into consideration. If a server is overloaded or slow, the LB will not stop sending new requests to that server. To handle this, a more intelligent LB solution can be placed that periodically queries backend server about its load and adjusts traffic based on that.
+
+9. Purging or DB cleanup
+	If a user-specified expiration time is reached, what should happen to the link? If we chose to actively search for expired links to remove them, it would put a lot of pressure on our database.
+	We can slowly remove expired links and do a lazy cleanup too
+	Whenever a user tries to access an expired link, we can delete the link and return an error to the user.
+	A separate Cleanup service can run periodically to remove expired links from our storage and cache. This service should be very lightweight and can be scheduled to run only when the user traffic is expected to be low.
+	We can have a default expiration time for each link, e.g., two years.
+	After removing an expired link, we can put the key back in the key-DB to be reused.
+	Should we remove links that haven’t been visited in some length of time, say six months? This could be tricky. Since storage is getting cheap, we can decide to keep links forever.
+
+10. Telemetry
+	How many times a short URL has been used, what were user locations, etc.? How would we store these statistics? If it is part of a DB row that gets updated on each view, what will happen when a popular URL is slammed with a large number of concurrent requests?
+	We can have statistics about the country of the visitor, date and time of access, web page that refers the click, browser or platform from where the page was accessed and more.
+
+11. Security and Permissions
+	Can users create private URLs or allow a particular set of users to access a URL?
+	We can store permission level (public/private) with each URL in the database. We can also create a separate table to store UserIDs that have permission to see a specific URL. If a user does not have permission and try to access a URL, we can send an error (HTTP 401) back. Given that, we are storing our data in a NoSQL wide-column database like Cassandra, the key for the table storing permissions would be the ‘Hash’ (or the KGS generated ‘key’), and the columns will store the UserIDs of those users that have permissions to see the URL.
+
+
+
+
+
+1. Requirements and Goals of the System
+
+You should always clarify requirements at the beginning of the interview and should ask questions to find the exact scope of the system that the interviewer has in mind.
+
+
+Functional Requirements:
+
+Given a URL, our service should generate a shorter and unique alias of it.
+When users access a shorter URL, our service should redirect them to the original link.
+Users should optionally be able to pick a custom alias for their URL.
+Links will expire after a specific timespan automatically; users should also be able to specify expiration time.
+
+Non-Functional Requirements:
+
+The system should be highly available. This is required because if our service is down, all the URL redirections will start failing.
+URL redirection should happen in real-time with minimum latency.
+Shortened links should not be guessable (not predictable).
+
+Extended Requirements:
+
+Analytics, e.g., how many times a redirection happened?
+Our service should also be accessible through REST APIs by other services.
+
+
+2. Capacity Estimation and Constraints
+
+Our system would be read-heavy; there would be lots of redirection requests compared to new URL shortenings. Let’s assume 100:1 ratio between read and write.
+
+Traffic estimates: If we assume that we would have 500M new URLs shortenings per month, we can expect (100 * 500M => 50B) redirections during the same time. What would be Queries Per Second (QPS) for our system?
+
+New URLs shortenings per second:
+
+500 million / (30 days * 24 hours * 3600 seconds) ~= 200 URLs/s
+URLs redirections per second:
+
+50 billion / (30 days * 24 hours * 3600 sec) ~= 19K/s
+Storage estimates: Since we expect to have 500M new URLs every month and if we would be keeping these objects for five years; total number of objects we will be storing would be 30 billion.
+
+500 million * 5 years * 12 months = 30 billion
+Let’s assume that each object we are storing can be of 500 bytes (just a ballpark, we will dig into it later); we would need 15TB of total storage:
+
+30 billion * 500 bytes = 15 TB
+
+Bandwidth estimates: For write requests, since every second we expect 200 new URLs, total incoming data for our service would be 100KB per second.
+
+200 * 500 bytes = 100 KB/s
+For read requests, since every second we expect ~19K URLs redirections, total outgoing data for our service would be 9MB per second.
+
+19K * 500 bytes ~= 9 MB/s
+Memory estimates: If we want to cache some of the hot URLs that are frequently accessed, how much memory would we need to store them? If we follow the 80-20 rule, meaning 20% of URLs generating 80% of traffic, we would like to cache these 20% hot URLs.
+
+Since we have 19K requests per second, we would be getting 1.7billion requests per day.
+
+19K * 3600 seconds * 24 hours ~= 1.7 billion
+To cache 20% of these requests, we would need 170GB of memory.
+
+0.2 * 1.7 billion * 500 bytes ~= 170GB
+
+
+3. System APIs
+Once we've finalized the requirements, it's always a good idea to define the system APIs. This would explicitly state what is expected from the system.
+We can have SOAP or REST APIs to expose the functionality of our service. Following could be the definitions of the APIs for creating and deleting URLs:
+
+
+creatURL(api_dev_key, original_url, custom_alias=None user_name=None, expire_date=None)
+Parameters:
+api_dev_key (string): The API developer key of a registered account. This will be used to, among other things, throttle users based on their allocated quota.
+original_url (string): Original URL to be shortened.
+custom_alias (string): Optional custom key for the URL.
+user_name (string): Optional user name to be used in encoding.
+expire_date (string): Optional expiration date for the shortened URL.
+
+Returns: (string)
+A successful insertion returns the shortened URL, otherwise, returns an error code.
+
+
+deleteURL(api_dev_key, url_key)
+Where “url_key” is a string representing the shortened URL to be retrieved. A successful deletion returns ‘URL Removed’.
+
+How do we detect and prevent abuse? For instance, any service can put us out of business by consuming all our keys in the current design. To prevent abuse, we can limit users through their api_dev_key, how many URL they can create or access in a certain time.
+
+
+4. Database Design
+
+
+
+
+
+
+*********************
+
+
+********************
+
+4th.
+Pick first 43 bits of MD5
+MD5 is a hashing function that generate 128 bit long Hash
+we will take first 43 bits
+
+we can us this apprach with DB approach...this will save space in DB..bcz in first place 2 different thread will create diff tiny url for same long URL if working simultaneously..but using MDS everytime hash will return same first 43 bits thus saving rows in DB..
+
+
+
+How to convert 43 bits to 7 char len tiy URL
+converting binary of 43 char to deciaml by doing c^0+2^1+2^2... for binay rep
+then convertt the decimal to Base 62 since oyu have 62 char in your disposal from a-z,A-Z,0-9
+now you can map each digit from 0-61 to one of the 62 character
+
+so 30 will be D, a ==0, A-27, 45 = G..then you can use them to create timey URL forthedecimal rep for 43 char of Md5
+
+
+6th. Range based apprach
+it scales very well
+we divide 1 billion in group of 1000 with 1 million range each
+  ==>1 to i million, 1 milion+1 to 2 million...
+and this info will be availabe in zoo keeper which is highly available and highly durable
+
+now when worker thread come to zookeeper it ask it to give him an unused range.. and mark it as used in zookeeper
+now that worker will genrate its timy url from its range..could maitian its own counter internally
+evertime they exhaust there rane tey ask for fresh range which is unused
+on can add new thread without worryng where it will go
+what happen if worker thread die in between ..not a big deal we ony loss that range and we still havelong range till.3.5 trillion..
+this works till zookeer service is ther
+
+how to cope up with incrematal appraoch bcz hackers can predict the next incrematal approach if youa re not adding randomness..so what could be adone is taking the 43 bits add extra 15 bits of randomness to it.
+ In that case the tineURL will be 9 char lng and not 7. bcz it wil be of 59 bit long and not 43 bits bcz of added randome 15 bits
+
+
+******************
+
+
+
+
+First they are looking for scalable solution, persisatenT and durable
+
+API
+application layer
+Persistence Layer
+
+
+Start with thinking about the APIs which you could be using as a end user
+1. createTinyUrl(long URL) -- > return short URL
+2. getLongURL(short URL) --> return long URL
+
+
+
+what interviewer is looking for:
+1. how you generate unique tiny url out of 100 char long url to just 7 char lshort URL and maintian uniqueness (application layer)
+2. How U store and retuve those long and short URL (persistence layer topic)
+
+
+
+
+Load balance deligeates the work to one of the server thread
+
+we will also have cache like memcache or redis
+
+
+FLow for user:
+they make a REST call to load balancer(LB)
+load balancer delegates it to one of the worker server/thread W1,W2,W3...
+Worker threads that save them to persistence data storage for later retieval
+Worker could also get it from cache memory if it is present in them without hitting DB everytme..
+
+
+
+
+How to make the tiny URL
+
+char allowed --> a-z, A-Z, 0-9 == 62 char
+now since we need any 7 out of these 62 char..so combination would be 62^7 == 3.5 trillion (3.5216146e+12)
+
+Now if oyur service is generating 1000 tiny url to generate per sec, it would still take 100 yers to exhaiust 3.5 trillion combination
+on the other hand if your service is generating mmillion timy url per second, yu will exhaiustt htis in 40 days
+
+
+Now any number from 0 to 3.5 trillion can be represented by 43 bits... 2^43 ~= 8.796093e+12
+
+
+
+Technic to generate tiy URL
+
+
+
+Id DB
+you will have key as tinuURL and value as long URL...thts all for DB schema
+
+
+FLow:
+1st way:Generate random tiny URL and check DB for its existence
+	-- sometime it will exist and sometime it will not..
+	-- in case of putting it in DB, 2 thread can be simultneous put same timy URL for different longURL and one of them will win thus corruoting the sytem loong URL
+
+
+
+2nd technique is put if abset in DB
+-now its easy for relational DB which supporet ACID propertyy but not so trivial for noSQL DB..
+why would one use noSQL bcz it scale really well than relationsl
+so for his U need DB support
+
+
+3rd way:
+put tiny,long is DB but check if any exist in DB for that longURL or not
+if it matches you are done and if it dosent thatn create anoher tiny url and repeat the process.
+problem with this is it could take long since the collision resolution but more than that each write call is having a getCall associated with it
+
+
+
+
+4th.
+Pick first 43 bits of MD5
+MD5 is a hashing function that generate 128 bit long Hash
+we will take first 43 bits
+
+we can us this apprach with DB approach...this will save space in DB..bcz in first place 2 different thread will create diff tiny url for same long URL if working simultaneously..but using MDS everytime hash will return same first 43 bits thus saving rows in DB..
+
+
+
+How to convert 43 bits to 7 char len tiy URL
+converting binary of 43 char to deciaml by doing c^0+2^1+2^2... for binay rep
+then convertt the decimal to Base 62 since oyu have 62 char in your disposal from a-z,A-Z,0-9
+now you can map each digit from 0-61 to one of the 62 character
+
+so 30 will be D, a ==0, A-27, 45 = G..then you can use them to create timey URL forthedecimal rep for 43 char of Md5
+
+
+
+5th way:
+counter way approach
+a. single host
+this couter host could be a DB or a zoo keeper reference
+
+single point fo failure and single point of bottlerneck
+
+b. all worker host has a counter
+lets say you have 64 worker hosts, so how many bits you need to rep those 62 hosts, 6 bits(2^6=54)..assign ununsed 6 bits to each worker..
+
+32 bits given to timestamp for a given moment , plus 6 unused  bits,  this adds up to 38 bits ,we stil have 5 more bits (to make it 43 bits which we need to rep 64 characters) which we could add randmly or incermetally..
+
+in this ther is high chanes for colliion if ther are 1000 req per second..as 38 bits won't chane for a seconf..as for a seconf timestamp is constant,..an last five bits are not sufficent to handle 20 request per second ( bcz last 5 bits ould max generate 32 numbers..so 20 req is still possibleif U do it incremetnally but in random ther is chance of collion..bu if U end up dong more than 32 req incremntal approch will also fail).. why 20 rq per sec...1000/62 worlers
+
+Aloo removing and addin host worker is chllenge bcz now if oyu add 65th host, your 6 bit req for each woreler will not work,..
+
+One way to make this approach work is  to not waste 32 bits on timestamp and use something more intelliget from timestamd and icerese number of random bits
+
+
+c. Range based apprach
+it scales very well
+we divide 1 billion in group of 1000 with 1 million range each
+  ==>1 to i million, 1 milion+1 to 2 million...
+and this info will be availabe in zoo keeper which is highly available and highly durable
+
+now when worker thread come to zookeeper it ask it to give him an unused range.. and mark it as used in zookeeper
+now that worker will genrate its timy url from its range..could maitian its own counter internally
+evertime they exhaust there rane tey ask for fresh range which is unused
+on can add new thread without worryng where it will go
+what happen if worker thread die in between ..not a big deal we ony loss that range and we still havelong range till.3.5 trillion..
+this wrls till zookeer service is ther
+
+how to cope up with incrematal appraoch bcz hackers can predict the next incrematal approach if youa re not adding randomness..so what could be adone is taking the 43 bits add extra 15 bits of randomness to it.
+ In that case the tineURL will be 9 char lng and not 7. bcz it wil be of 59 bit long and not 43 bits bcz of added randome 15 bits
+
+
+
+
+
+TO make get operation fast in your country one can cache the tinmy and long url in CDN of the respective country/local city
+
+
+
+Load Balancer
+REST API
+Zookeeper
+NoSQL DB
+CDN
+MD5 memcached
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

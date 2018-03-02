@@ -1,0 +1,196 @@
+
+
+S.O.L.I.D. Principles of Object Oriented Design
+
+
+
+readon for SOLID principle:
+
+Rigidity:
+every change affects many other parts
+
+Fragility:
+things break in unrelated places
+
+Immobility:
+cannot reuse code outside of its original context
+
+
+
+SOLID principle
+
+S -- Single responsibility principle
+O -- Open close principle ... open for extensiona nd close for modification
+L -- Liskov substitution principle .. desing by contract
+I -- Interface segregation principle
+D -- Dependency Inversion Principle
+
+
+
+
+Single responsibility principle
+A class should have only one reason for change
+Do not embed two functionaly in single class
+
+
+Open close principle 
+you should be able to extend a class without modifying it
+open for extensiona nd close for modification
+
+public interface IMyExtension {
+	public void doStuff();
+}
+
+@Service
+public final class ClosedClass {  /* final -- cloased for modification */
+	
+	private IMyExtension myExtension;
+
+	@Autowired
+	public CLosedCLass(IMyExtension nyExtension) {
+		/*  Open for Extension */
+		this.myExtension = myExtension;  
+	}
+
+	/* SOME METHODS THAT USES THE IMyEXTENSION ONJECT */
+}
+
+
+Liskov substitution principle
+Derived classes must be substitutable for their base classes
+e.g if it quirks like duck, walks like a duck,but it needs batery then its probally a wrong abstraction
+
+Any code consuming a subclass or interface abstraction must not assume beyond the defined abstraction
+ANy subclssing of a superclass or implementation of an abstraction must adhere to the requirements and the conventions of the interface of the abstraction
+
+void SomeMethodWhichViolatesLSP(IVehicle aVehicle) {
+	if(aVahicle instanceof Car) {
+		Car car = (Car) aVehicle;
+		/* THIS METHOD IS NOT ON THE IVEHICLE INTERFACE, SO THIS SHOULD NOT BE HERE. ANY INTERFACE IMPL SHOULD CALL ONLY INTERFACE METHODS */
+		car.changeGear();
+	}
+}
+
+Another ex.. Car has an interface for drive() and shiftGearUp()
+Now tesla is a car which inherits from Card but being elctirc and automatic car,it cannot model shiftGeraUp() in its impl thus throwing error if we want of do nthing impl. But both of these approaches are prone to error doen the line. so we conlcude Tesla is not a car based on our interface. this is what we mean when we say we should not think ahead of our interface whicle making impl..no matter if it models in real world well or not..bcz in real world tesla is a car..
+
+
+
+Interface segregation principle
+Make fine grained Interfaces with specfic methods
+One interface should not contain more than one functionalty
+use specfic interface to hide functinalty not used by interface-clients(clients e.g classes,etc)
+
+
+
+Dependency Inversion Principle
+We should depend on abstraction andnot conscretions
+e.g make use of interfaces
+program to interface and not impl
+DOn't declare variables to be instance of particular concreate classes
+Instead commit only to an interface or abstract class
+
+/* If U r creating a separate class instance insde the constructor of other class, its a sign U need to refactor the code. reson being now in here we are making picture depededn on shape class.. instead of this pass shape as a parameter.. */
+var Picture = function(color, bg) {
+	this.shape = new shape();
+	this.shape.setColor(color);
+	this.background = bg;
+}
+
+Code shoudl depend on abstraction..by depending on abstraction(Interface) we are decopling our impl from each other
+CLass --> Interface --> dependecy1 implemts INterface
+					-->	dependency2 implmts Interface
+
+
+
+
+DEPENDENCY INjection:
+
+
+class --uses(depemdency)--> other class
+model --fetch--> databse(dependency)..database is pushed to mdoel from outsode..no new keyword in the constructor intead pass the requried onject as  a paramter
+
+Injecting dependency
+
+publci function COntructor(Databse db) {
+	/* That's it' ..No class, intantance creation,etc*/
+}
+
+Taking a door from a manufacures nd installing is bettet han creating door everytime
+
+
+what if many classs needs different depemdecy:
+solution is Dependncy Injection container
+
+class1 => array('dependency1,dependecny2,..');
+class2 => array(dependecy4,dependecy8,...)
+
+now getDependecy for a class will get dependecy list from stored class, check if its already instantioted and use it, if not create and store ti and use it..
+
+var obj1 = getDependency('class1')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

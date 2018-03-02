@@ -1,0 +1,46 @@
+
+
+Simulate Interview Experience
+https://csacademy.com/lessons/
+
+Practice Problems
+https://www.educative.io/collection/5642554087309312/5679846214598656
+
+
+
+Many Problems with sol Java
+Site takes time to load but load all at once.. Single page App
+http://n00tc0d3r.blogspot.in/2013/04/n-queens.html
+
+Dobe entire list on all topics
+http://www.gohired.in/adobe/
+
+
+interactive-coding-challenges
+https://github.com/donnemartin/interactive-coding-challenges
+https://github.com/donnemartin/interactive-coding-challenges#recursion-and-dynamic-programming
+Arrays and Strings - 10
+Linked Lists - 8
+Stacks and Queues - 8
+Graphs and Trees - 21
+Sorting - 10
+Recursion and Dynamic Programming - 17
+Mathematics and Probability - 6
+Bit Manipulation - 8
+Online Judges - 16
+System Design - 8
+Object Oriented Design - 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,68 @@
+
+
+
+
+1 sec =  1000 milisec
+
+2^31 = Ox 7FFFFFFF
+
+N bit system will rep 2^n-1 to 2^n-1 -1
+
+
+
+
+2^10 = KB
+2^20 = MB
+2^30 = GB
+2^40 = TB
+
+Given that each bit is capable of holding two possible values, the number of possible different combinations
+of values that can be stored in n bits is 2^n
+. For example
+
+8 bits can hold 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 = 2^8
+ = 256 possible values 
+
+
+Text(40) consumes 40 bytes. 
+A whole number from –128 to +127. 
+
+8 bytes = 64 bits: 
+Really massive whole numbers (in the range of + or – 9 quintillion). 
+Date/Time
+ Currency. 
+
+
+
+Early character sets (containing 26 capital letters, 10 numbers, a space character, and assorted
+punctuation) allowed 64 characters. A popular example is “ASCII 64”. These sets require 6 bits per
+character. Because of the need to include punctuation and/or special symbols in the character set, 6-bit
+character sets cannot differentiate between small and capital letters, and are now virtually unused. 
+
+2^ 6 = 64..so we need 6 bits for each
+
+Current western character sets contain either 128 or 256 characters, requiring either 7 or 8 bits per
+character. Each is typically stored in one byte (even if only 7 bits are used). 
+
+
+
+Some Asian character sets have space for as many as 64K characters, requiring up to 16 bits per
+character. 
+
+
+http://eckstein.rutgers.edu/mis/handouts/storage-calcs.pdf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

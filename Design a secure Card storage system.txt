@@ -1,0 +1,421 @@
+
+
+
+
+The Payment Application Data Security Standard (PA-DSS), formerly referred to as the Payment Application Best Practices (PABP), is the global security standard created by the Payment Card Industry Security Standards Council (PCI SSC).[1] PA-DSS was implemented in an effort to provide the definitive data standard for software vendors that develop payment applications. The standard aims to prevent developed payment applications for third parties from storing prohibited secure data including magnetic stripe, CVV2, or PIN.
+
+
+
+For a payment application to be deemed PA-DSS compliant, software vendors must ensure that their software includes the following fourteen protections
+
+
+Do not retain full track data, card verification code or value (CAV2, CID, CVC2, CVV2), or PIN block data.
+Do not retain full track data, card verification code or value (CAV2, CID, CVC2, CVV2), or PIN block data.
+Protect stored cardholder data.
+Provide secure authentication features.
+Log payment application activity.
+Develop secure payment applications.
+Protect wireless transmissions.
+Test payment applications to address vulnerabilities and maintain payment application updates.
+Facilitate secure network implementation.
+-- Cardholder data must never be stored on a server connected to the Internet.
+Facilitate secure remote access to payment application.
+Encrypt sensitive traffic over public networks.
+Secure all non-console administrative access.
+Maintain a PA-DSS Implementation Guide for customers, resellers, and integrators.
+Assign PA-DSS responsibilities for personnel, and maintain training programs for personnel, customers, resellers, and integrators.
+
+
+Maintain instructional documentation and training programs for customers, resellers and integrators.
+
+
+******************
+
+We’re often asked, “What’s the difference between encryption and tokenization — aren’t they the same? Which is better for safeguarding data and meeting PCI security compliance requirements? And how do we decide which is better?”
+
+The short answer is they’re completely different technologies — and polar opposites when it comes to handling and securing ­sensitive data, such as credit cards numbers.
+
+The purpose of most encryption tools and techniques is to mask original data, then allow it to be decrypted. Encryption uses an algorithm to scramble credit card information that makes the data unreadable to anyone without a proper key. The original card data, however, stays intact and often resides on a company’s internal networks — thus creating vulnerabilities.
+
+Encryption is most often “end-to-end,” which means confidential credit card data is obfuscated at the point of entry (e.g., when someone enters card data into a web browser to buy an item) and decrypted when the purchaser’s authorized credit card information reaches its intended destination (e.g., a merchant’s e-commerce database).
+
+Some proponents maintain that, because encrypted card data is unreadable while it’s “at rest” in a database or “in motion” during a purchase transaction, and inaccessible until a key decrypts it, the chances of a hacker intercepting and stealing the data is minimal. But, if card data passes through multiple internal systems en route to an acquiring bank or payment gateway, the encrypt/decrypt/re-encrypt process could open a wide security hole to crooks.
+
+Why tokenization?
+
+Many companies have found tokenization to be cheaper, easier to use and more secure than end-to-end encryption.
+
+Tokenization completely removes credit card data from a company’s internal networks and replaces it with a unique, generated placeholder, or “token” — much like emptying a warehouse so that a thief has nothing to steal. Merchants use only the token to retrieve, access, or maintain their customers’ credit card information. Meanwhile, their customers’ real card data is stored at a highly secure, offsite location.tweet-graphic-4
+
+Tokens have no meaning by themselves and are worthless to criminals if a company’s system is breached in any way. For example, if someone’s actual credit card number was 2123 3456 5678 6789, it might become EGHV234AUD54367 when a token is generated. The token is randomly generated and there is no algorithm to regain the original card number — crooks can’t reverse-engineer the actual credit card number, even if they were to grab the tokens off the servers.tweet-graphic-4
+
+Using tokens doesn’t change a merchant’s payment processing experience either. Just like credit cards, tokens can be used for customer sales, refunds, voids and credits — only they’re much safer for a merchant than actual credit cards.
+
+Removing confidential customer credit card data from their internal networks is one of the biggest reasons why more companies are relying on tokenization. All merchants who accept, transmit, process or store credit card data online, in a store, by phone or by mail must certify each year that their IT security and processes comply with 12 rigorous Payment Card Industry Card Data Security Standard (PCI DSS) requirements.
+
+Who benefits?
+
+Companies that collect and store credit card data themselves often find the PCI process to be a huge headache with potentially significant liabilities and costs rather than a convenience for their customers. Because every point at which credit card data is handled must be secured, conforming with these rules as well as building and defending one’s own data fortress can become extraordinarily difficult and prohibitively expensive.
+
+We find that many large enterprises keep multiple copies of the same customer payment data on old legacy systems whose underlying technologies remain solidly rooted in the 1960s. Because these systems are transaction-based rather than customer-based, their interoperability with internal audit and accounting processes is severely limited. To make matters worse, organizations often don’t know where sensitive data resides on those systems and have no control over it. But even if a fraction of their revenue is card-based, the company must become PCI-compliant.
+
+Because tokenization renders cardholder data useless to criminals, the liability and costs that merchants often associate with PCI
+compliance is dramatically reduced.
+
+
+******************
+
+
+PA-DSS applies to third-party applications that store, process or transmit payment cardholder data as part of an authorization or settlement. Software applications developed by merchants for in-house use only are exempt from PA-DSS but must comply with PCI DSS.
+
+
+What is the difference between PCI DSS and PA DSS?
+PCI DSS(Payment Card Industry Data Security Standard) and PA DSS (Payment Application Data Security Statand)
+
+Every organization that handles credit cards needs to comply with PCi DSS, only vendors that make and sell payment applications need to meet PA DSS.
+
+The PCI DSS is a standard that ALL organizations that store, process and/or transmit credit card data must be compliant with.
+
+The PCI Data Security Standard is a multifaceted security standard that includes requirements for security management, policies, procedures, network architecture, software design and other critical protective measures. The PCI Data Security Standard is comprised of 12 general requirements designed to:
+
+Build and maintain a secure network;
+Protect cardholder data; Ensure the maintenance of vulnerability management programs;
+Implement strong access control measures; Regularly monitor and test networks; and
+Ensure the maintenance of information security policies.
+
+each of the five PCI card brands (MasterCard, VISA, Discover, AmEx and JCB) maintains its own program for compliance, validation levels and enforcement.
+
+
+Entities that have limited scope in their cardholder data environment (ex: retailers that use imprint only or process all card data with an online provider and have no electronic storage of cardholder data at their sites or on their networks) may not be required to submit a Report on Compliance (ROC) and can use the self assessment questionnaires (SAQs) for PCI DSS compliance. If you’re not sure what your compliance requirements are, check with your acquirer or card brand.
+
+
+The PA DSS is the standard for makers/developers and integrators of payment applications that use credit card information for payment authorization and settlement. To require PA DSS compliance these applications must be sold, distributed or licensed to third parties. In other words, if you wrote your own payment application that you use in your organization, it has to be PCI DSS compliant but not PA DSS compliant. If you are a payment vendor that sells your payment application to customers, it has to meet PA DSS. Card brands encourage organizations to use only PCI SSC validated applications. The SSC keeps a current list of validated payment applications.
+
+
+
+
+I'd start by looking at your app inventory and seeing how difficult it would be to migrate to tokenization. SANS has a decent white paper on both the PCI scope-reduction and cardholder security benefits of tokenization here: http://rud.is/mfZf
+
+You don't have to use a commercial tokenization solution, but I suspect that's the safest (and quickest thing to do).
+
+That being said, you still need to adequately protect your database server (encryption + access control + logging/alerting). It's hard to recommend further without knowing more about your actual logical and physical layout, but at a minimum the in-scope PCI DSS fields need to be encrypted and have tight access control. Passwords should not be stored anywhere and application access needs to be tightly controlled. Any app that truly needs to touch a real CC# should be in that firewalled enclave and only transmitting it for payment over an encrypted channel to your provider.
+
+
+
+The best answer is to not to store them if at all possible and if you have to then see if you can use tokenisation.
+
+If you have to store them obviously encrypt using a strong encryption method such as AES. The big issue that gives you is how to store the keys. Encryption is no protection if someone can get at your keys and your application has to has have access to your keys somehow to encrypt and decrypt the data.
+
+You also have to think very carefully about how you backup your data and destroy it once it is no longer needed.
+
+And remember that storage of the CVV is never allowed under PCI DSS even if it is encrypted.
+
+I would really recommend you try and think again about storage and see if you can find other methods to handle the recurring billing.
+
+
+
+
+Keep all files containing credit card information on a password-protected user with administrator privileges. Keep the computer itself locked in place. Do not store credit card information on a laptop, flash drive or other easily portable storage device.
+
+Password protect the accounting and billing software that stores or interacts with credit card information. Use different passwords from the one that protects the user account.
+
+Safeguard the passwords and technical specifications of your accounting software, restricting access to only those who need to access the information. This may mean limiting the number of people who are able to do certain jobs.
+
+
+Consider online processing services, many of which will allow direct billing. Direct billing services can be set up so that only the computer can access actual credit card information. The transaction goes through without even the user seeing the entire credit card number.
+
+
+At a minimum, here are steps to consider:
+
+Ensure the online order form is using HTTPS to capture data.
+If the DB and web server are different boxes, ensure a secure path between them.
+Encrypt the payment data in the DB. MySQL Reference.
+Ensure strong access control to the back-end web page (is it physically accessible to the outside world? Does it require a strong password? Is it HTTPS?)
+Ensure there are no logs (e.g. debug log) that end up writing the payment info to the file system.
+
+
+
+
+
+*******************************  *******************************  **************************************
+				A Proposal for Secure Storage of Credit Card Data
+
+
+http://www.unixwiz.net/techtips/secure-cc.html
+
+1. It's an Application, Not a Database
+The Credit Card Authorization system is actually used twice per transaction: once at the very start of the order where the customer's card information is verified (but not charged), and later once the merchandise ships, when it is charged. The initial auth check is done in realtime, while the later charge to the customer's card is done in batch.
+
+2. "Why not just encrypt the database?"
+While researching this question, the most common suggestion, by far, has been "Just encrypt the database". Though a reasonable suggestion, we don't believe that it even begins to address the real security issues under consideration.
+
+Encrypting the database, by itself, does little more than protect the physical media holding the database volume itself (and perhaps their backup tapes). This is not inconsequential protection, and it certainly ought to be employed if possible, but considering the diagram above, it seems that it's leaving completely unaddressed a very large set of attacks on our sensitive data.
+
+It won't protect against application failures, inside users issuing SELECT * FROM customers queries, logfiles containing sensitive information, or SQL injection attacks against the webserver. If the data are available in the clear for business use, it's available in the clear for improper use.
+
+What seems clear is that securing data at the application level is more important than securing it at the physical level, and — for instance — setting strong database permissions will foil more kinds of common attacks than will encrypting the database.
+
+Columns containing sensitive data — whether encrypted or not — should be ruthlessly restricted at the finest possible granularity. For instance, the web application code that inserts data into a "pending orders" table, it might have no rights to read back from that table (or at least the CC number). Ordinary users should not have those rights either. Tuning these rights requires a lot of thoughtful consideration.
+
+This absolutely does not suggest that one should not employ database encryption if available, especially where physical security cannot be guaranteed, but one should not rely exclusively on this to protect sensitive information throughout an enterprise.
+
+
+3. Business Need for Access to Sensitive Data
+We'd love to implement a "Data Motel", where "sensitive data checks in, but it doesn't check out". In that case, we could use a one-way cryptographic hash on the data the moment it enters the system so it would never again appear in cleartext. Alas, such is not in our use-case.
+
+Instead, we must consider how we might protect the data in a way that nevertheless makes it available to our application when it's legitimately needed. But it also suggests — strongly — that business procedures be reworked, when possible, to avoid the need in the first place.
+
+This requires substantial research by the IT staff to query where this data is used throughout the enterprise. Here we present the list as discovered, along with proposed workarounds:
+
+The data must clearly be presented in cleartext to the credit card processor — the bank — and this is a natural (and necessary) place to perform the decryption.
+From time to time, they receive a call from a cardholder saying "I see a charge from your company on my statement; I didn't make that purchase". Call center staff requires the ability to locate order(s) placed with that card. This can likely be done with just the date, transaction amount, expiration date, and the four digits of the card number. We might take a further step by insuring that the internal transaction number appears on the credit card statement.
+In the retail stores, good customers will call in and order a certain item with the request that it be paid for with the last credit card number and shipped to the previous address. It seems likely that this can be implemented without revealing the customer's card number to the salesclerk placing that second order.
+
+Note — changing the ship-to address must require entry of the card number; otherwise the account may be subject to fraudulent use.
+
+When a card purchase is declined, the customer must be contacted and new payment arrangements made. The customer will inevitably ask "which card did I use?": it may be sufficient to provide the last four digits of the card number to the customer.
+When investigating problems with the CC Authorization process itself, IT personnel may need this data in cleartext to coordinate with staff at the bank.
+Purchases made in the stores are done differently than those made online or through the call center. Generally speaking, credit cards can't be charged until a product actually ships, but in the stores this is not an issue: the customer has the merchandise in his or her hands at the time.
+
+The card is swiped at the register, and full card data from the magstripe is collected, and it serves as a "card present" verification that earns the merchant a somewhat better rate from the bank (presumably because card-present transactions have lower incidence of fraud). This full track data may not be stored for later use: it can only be used for the transaction while the card is actually present.
+
+If the credit card authorization system is not available (network problems, perhaps), only the "regular" information may be stored for later processing, not the full track data.
+
+Every day, a reconciliation report is downloaded from the bank that allows the customer to match transactions that should have occurred with transactions that did occur. This reconciliation is now done using the credit card numbers as part of the search criteria. It's not yet clear exactly how this reconciliation is received or used.
+Our design must accomodate all of these business needs.
+
+
+
+4. Selecting the crypto
+It seems clear that using symmetric encryption to protect this data provides limited real benefit: if the same key encrypts the data as decrypts the data, this key would have to be widely distributed and thereby become a "worst-kept secret" around the company, or at least among the development and IT staff. If everybody can decrypt the data, it's not really clear how much security has really been provided.
+
+[Symmetric Encryption]
+Figure 2 — Symmetric Encryption
+It's just very hard to imagine how this key could really be truly protected even if it were attempted diligently, especially in light of the distributed nature of the software (webserver, retail stores).
+
+Instead, using public key encryption seems promising, where one key is used to encrypt the data, and another is used to decrypt it. This is asymmetric encryption, and it permits the wide distribution of the public (encryption) key while simultaneously allowing very tight control over the private (decryption) key.
+
+[Asymmetric Encryption]
+Figure 3 — Asymmetric Encryption
+The details of just which public-key mechanism is chosen seems relatively unimportant during this stage, especially compared with how it fits into the larger infrastructure.
+
+
+
+
+
+5. Overall Approach
+Our intention is to encrypt "early and often": as soon as sensitive data is entered by a user on a website, by a customer-service rep in a call center, or by a clerk in a retail store, it's immediately converted into a protected format before moving on to the next stage. Encryption would occur long before it entered the database, and the resultant string would not be particularly sensitive.
+
+Any program needing to fetch this protected data could do so, though the crypted data itself would be meaningless without the private key. But the format — described below — would also include a display string that would be used on entry screens or reports. This string may include just the last four digits of the CC number, for instance.
+
+This particular enterprise uses a credit-card system based on a central network server. Requests for authorizations (which include the amount, cardholder name, CC number, etc.) are routed over the internal network to this server, which multiplexes them to the Credit Card Processing company over a private line.
+
+This seems like the perfect place to decrypt the data because it's the last step in the process before it leaves the enterprise. It's a single process that can be protected and monitored closely, and would drastically minimize the exposure and distribution of the private key.
+
+This mechanism appears to provide maximum safety of the sensitive data by keeping it encrypted essentially end-to-end, and even a skilled insider with the entire database, the public key, and a full knowledge of how the system was built would be unable to obtain the sensitive data unless the machine with the private key were cracked.
+
+
+6. The Protected Format
+Just "encrypting the data" and sending it on its way is not really sufficient, and credit card numbers provide a perfect example: it's common to display credit card numbers with * in place of the digits, except for the four digits. Any solution must find a way to provide this partial display of data.
+
+Our proposal, which is still highly preliminary, is to encrypt the data into a particular ASCII format that will be processed in string form as if it were the original data. The format will be such that software can recognize "This is encrypted data" and handle it accordingly.
+
+The protected format will encode the type ("credit card number", "Social Security Number", etc.), the actual crypted data, and the display string:
+
+[Proposed protected format]
+Figure 4 — Proposed protected format
+We're using $ sign simply as a unique delimiter; in practice this must be chosen to fit in with a customer's circumstances. We'll continue to use it throughout this paper.
+
+The type information is our extensibility mechanism that provides for multiple levels of sensitivity; "Credit Card Numbers" and "Social Security Numbers" are likely more sensitive than "street address" and "birthday". By encoding the type information, the decryption service could require more or less rights before performing the operation.
+
+The crypted data portion is an ASCII encoded version of the binary result of encryption, and it may be represented in an alphanumeric encoded form (radix-50, perhaps). It will be unrecognizable in any human-readable way.
+
+Strictly speaking, we don't need to include the display text, because the application could choose to carry this in a separate field, but that strikes us as a lot of extra work (an additional database field, plus the software required to support it). By carrying this along with the protected form, it strikes us as easier to use in the general case.
+
+The display text is created by the encryption procedure itself, and it's done in a way to maximize readability by an operator. In many cases this will simply replace the printable characters with a *, but for credit cards this will leave a few of the digits in cleartext.
+
+We expect that the protected format will be substantially larger than the equivalent cleartext. This is due to the overhead of the protected format itself, the quasi-duplication of the input data in the display string, and the fact that the input to the crypt routine includes more than just the sensitive data itself. A three-to-one expansion seems likely even if space-minimizing techniques are employed.
+
+Nobody ever said security came for free.
+
+
+7. Encryption details
+This is treacherous ground, because we are not crypto experts, and it's a notoriously difficult area to get right even for those who are experts. It's remarkably easy to use known-secure methods insecurely in ways that are not obviously insecure until looked at in retrospect.
+
+The input to the encryption function will be the sensitive data itself, as well as the type of that data. This type will be prepended to the resultant protected string, and it may be considered when honoring decryption requests. More sensitive data will require higher rights, and some requests will necessarily be denied on that basis.
+
+But if the type is only found in the protected string, nothing would prevent an attacker from simply changing the type and submitting the request: this would be an obvious bypass of the sensitivity level. Instead, the type is also encoded inside the data to be encrypted. Upon decryption, if the inside and outside types don't match, the request will be dishonored (and logged).
+
+At first we considered including a salt in the process to forestall dictionary attacks on the data, but this seemed insufficient. Even with a salt, a 16-digit credit card number doesn't really have 16 unknown digits: the last four digits will be provided in the display string, and even if one assumes that the first digit is evenly distributed (it's not: it's most likely a 4 or 5), one ends up with around 36.5 bits of data to be secured.
+
+If the attacker has the public key and knows the encryption algorithm, it's a straightforward process to brute-force the card number by iteratively crypting increasing values (4000000000XXXX, 4000000001XXX, etc.) until the generated value matches the one found in the database.
+
+Since there are only 10,000 possible final-four values, this suggests that the expensive encryption operation could be compared to multiple records in a large database each time.
+
+This problem is more difficult when other kinds of data are considered, such as the CVS SSAN field, which are smaller. These are simply no effort whatsoever to brute force in this manner.
+
+The solution we're suggesting is to include some random, "garbage" bytes inside the data to be encrypted, and then crypt the resultant string; this makes it much more difficult to attempt a brute-force attack. We understand that this is known as a "confounder" (we previously thought it might be called a "nonce")
+
+[Adding a confounder to the end]
+Figure 5 — Adding random data to each packet
+One potential concern is that since the same data ("$CC$", the type information) at the start of each bit of sensitive data, this might give an attacker a bit of help when attempting to determine the private key.
+
+We're not really sure if this matters, but if it does, it could be perhaps countered by splitting some parts of the random data before and after the "real" data, with a token that helps us locate how much:
+
+[Adding a split confounder]
+Figure 6 — Splitting the random data before and after
+We have no idea if this confounder-splitting is prudent, foolish, or dramatic overengineering.
+
+
+
+8.Process Implementation
+First, independent of internal representation of secure data, business practices must be modified to accomodate the heightened concerns over sensitive data. The mere fact of rolling out the new procedures serves to protect the data by making it less exposed in the first place.
+
+For instance, the software module that allows a customer-service agent to search for orders by credit card number (when responding to a card-used-fraudulently report) should be modified to accept just these limited bits of data:
+
+Transaction amount
+Last four digits of card number
+Card's expiration date
+Cardholder name
+Date of transaction
+From this, the customer-service agent should be able to locate the order(s) in question and take appropriate action. At no point is the actual sensitive data — the full card number — involved.
+
+Note — agents must be trained to ask for just the last four digits, and to not accept the whole card number even if offered. This seems like something that ought to be tested during customer-service agent monitored-call audits.
+
+These kinds of changes lend themselves to individual implementation, and should be pursued early and aggressively. Not only do they serve to protect data immediately, but may help expose deficiencies in our understanding of just how the big-picture project is to be implemented.
+
+It also reduces the footprint of the all-at-once changes that are certain to be required once the actual crypto is implemented: anything that can reduce the size of that transition reduces implementation risk.
+
+Broadly speaking, there are two places where sensitive data interacts with the user (even assuming that both have been reduced due to changes in internal procedures):
+
+Data Entry
+Data Display
+Data Entry is necessary, of course, when an order is being placed, and it cannot be crypted or hidden from the agent during the order-taking process because it must all be verified with the customer: "OK, sir, let's confirm the details of your order."
+
+Once the order is submitted, however, the data entry software should immediately encrypt it with the public key into the protected format, and this string passed on to the next stage in the system.
+
+This next stage could be storage in the database in an "orders" table, routing to the bank to perform a realtime authorization, or staging in the webserver database for later delivery to the main office for processing. In any case, once encrypted, the sensitive data should not appear in cleartext other than in the authorization processor talking to the bank.
+
+This same encryption operation must be implemented far and wide, at all the points where sensitive data enters the enterprise. In particular, it must be implemented before the data is actually stored in nonvolatile media (database tables, logfiles, transaction journals, etc.).
+
+Concurrent with data entry is data display, and at this point it's not clear that the sensitive data should ever be shown on a screen directly. So we're left with the protected format. It would be silly to show the whole protected string on an agent's display screen:
+
+$CC$mAisnwq43slgeesnAf4mAis4wqslg7snAfmAis$********1234
+Instead, the display code must detect that it's considering protected data and know how to extract just the display field from it. If, instead it finds cleartext data, it auto-limits the CC number to just the last four digits.
+
+By implementing "smart code" that can tell whether it's working with crypted data or not, it allows for staged implementation and rollout throughout the system.
+
+Much of this relies on an essentially one-way direction of travel throughout the system: once entered, the data mainly flows towards the card-authorization processor, with limited need to display even the masked format.
+
+
+
+9.The Credit Card Authorization System
+The more our design has eliminated the need for sensitive data appearing in cleartext, the more central this machine's security becomes. One transaction — whether in the full "card present" form, or the more limited store-data form — involves these steps:
+
+Receive transaction (with encrypted sensitive data) over the network
+Decrypt the sensitive data (if necessary), rejecting/logging if unsuccessful
+Create authorization packet in bank-specific form
+Send authorization packet to bank, wait for reply
+Receive response from bank (in cleartext)
+Re-encrypt the sensitive data in the reply, then log
+Send response back to the client
+This may be the only point in the entire enterprise that requires the private key in order to decrypt the data, and this means that the machine must be heavily secured. This service is currently run on the main UNIX system, but it will be moved to a dedicated system that can be physically secured with lock and key.
+
+Highly detailed logfiles are maintained by this program to allow for debugging of communications as well as to research prior transactions. These logfiles are now all in cleartext but will all be moved to a protected format.
+
+A key issue (so to speak) is how to maintain proper security of the private decryption key, and this requires substantial consideration.
+
+10.Open Issues / Attacks
+We're quite sure that we have not addressed everything required, and that even some already-considered areas still have weaknesses. We'll touch on the issues that are on our mind and hope for informed feedback.
+
+We will repeat for the record: We are not crypto experts. Please keep this in mind when considering the open points.
+
+Which crypto algorithm?
+We have not selected an actual algorithm, but it's looking like RSA public-key encryption will be our first choice. We've not really researched the particular requirements, but we're confident at being able to find implementations for the systems that we must support.
+Key Protection
+Good security management includes periodic changes of important keys, but we believe that asymmetric keys require this at longer intervals than symmetric keys do.
+The encryption key — whether it's the same as the decryption key or not — must be widely dispersed so as to perform this encryption as early as possible upon sensitive data's entry into the system. Not only will it be found on the main systems at the corporate office (and subject to relatively good physical security), but will also be found on PCs in much less secure locations such as a retail mall which is unguarded overnight. In addition, the encryption key will necessarily be known to the development staff, who will be incorporating it into the software.
+Both of these suggest that when using symmetric encryption, one has no choice but to change the key at regular intervals to help keep the keys from "circulating". The interval might be relatively short, on the order of several months, if there is turnover among personnel with access to that key.
+With asymmetric crypto, this key does not circulate, so it seems much less important to change it at regular intervals. This is, of course, directly proportional to the ability to limit access to that private key.
+Key Change
+Even given the previous item, one ought not simply adopt one key and have that be the end of it: there must be provisions for changing the key at some intervals, even if it's only when those entrusted with the current key leave or become otherwise untrustworthy.
+"Changing the key" must be understood in its full context, which includes an emergency operation. These steps must be supported:
+Create new public/private keypair
+Assign passphrase to private key
+Put private key onto CC comm controller machine(s)
+Distribute public key to all encryption endpoints
+Re-crypt all stored data everywhere
+One approach is to essentially shut down the company while this re-key operation takes place, but that has substantial operational (and revenue) impacts: better is to build a system that allows for key change to be propagated automatically.
+Distribution of the public key seems straightforward: one could build a simple "key server" that all clients would poll periodically (and certainly not on every request or in realtime), replacing the key when offered.
+By this method, the key used for new encryptions would phase in over a relatively short time — a day, at most — but this would not obviate the need for the credit-card processor to support more than one key simultaneously so as to allow for input data from sources that have and have not yet gotten the new key.
+It's not clear how this will be handled: it may be that we include a key version token in the protected format, or it may be that the cc processor merely attempts one key after another until it finds a valid decryption. But it seems clear that old keys would not be honored indefinitely
+A sticky issue is re-crypting of existing data, and one approach could be to build this into the network service that handles credit-card authorizations: by presenting data in a special format, it would simply decrypt the data with whatever key, encrypt it with the current key, and then return it to the caller.
+This approach would have the advantage of being a very smooth integration: the auth controller would always be available to make this conversion without special arrangements. But it would undoubtedly be slower than a direct data conversion requiring access to the private key.
+But key change is more problematic at remote locations: using a network network service for re-cryption would involve sending the data twice, with the old key and with the new key, and this seems like a cryptographically dangerous approach (though we'd change the confounder to frustrate those efforts).
+What seems more prudent is to design the remote software to simply not maintain any "master" copies of sensitive data locally, but to instead use a local cache. Then, on key change, one could simply dump the local cache and have it be re-refreshed as needed going forward.
+Historical data, whether in logfiles, separate tables, or on backup tapes, would likewise contain data encrypted with old keys, and it seems that we might provision to support even very old data on the comm/crypt controller. But this is not for sure: if the crypt controller can support two keys at once (current and previous), it may well be that data older than that wouldn't have any real value. Though the bulk of the old data might be reloaded for some look-back purposes (an audit?), the sensitive data would not be reused, so it wouldn't matter whether the data could be decrypted or not.
+Protecting the CC Processor
+Putting the private key on the machine performing the actual communications with the bank cannot be avoided, but it is possible to secure this machine vigorously.
+The machine must be secured beyond the mere protections afforded by the corporate data center; it must be physically secured separately from the other systems (under lock and key), and network access must be very heavily restricted. This suggests that routine system logs should be sent off-machine so they can be monitored without access to the secure system.
+Protecting the Private Key
+As mentioned many times, the private key is the most secure entity in the entire system, and it must be protected vigorously. But it can't be so well protected that it can be lost (or sabotaged by a single rogue staffer), which would be catastrophic.
+A procedure for generating keys will be generated such that the key itself is protected by a good passphrase, and the key saved to removable medium (CD, USB key, floppy). In addition to the production procedures for handling these, the key disk could be given to one of the business owners, and the passphrase given to one of the others.
+The passphrase could actually be split in parts and distributed so that each sub-part is given to a different person. This is the equivalent of requiring two physical keys to open a safe-deposit box: it requires collusion, not just dishonesty to misuse the key.
+This area must be given considerably more thought.
+Unattended CC Processor Restart
+We presume that the private key will be protected with a passphrase, but it's not clear that we can require human intervention for restarting the secure CC processor machine. The enterprise operates 24x7x365, and orders can arrive at any time: Requiring entry of this passphrase upon unexpected reboot at 2 in the morning may simply not be feasible in the course of business.
+This suggests — shudder — embedding the passphrase into the card processor system so it can be read at any startup. This certainly militates towards increased physical security of that system, but it does mean that the system can run nonstop even with unplanned reboots.
+Implementing Crypto Everywhere
+One of the challenges is to actually get the encryption operation embedded at all the edge (with respect to the sensitive data) locations. These systems are implemented in multiple languages on disparate operation systems, not all of which provide the same crypto platforms. We must implement the code with the help of a testing framework that insures that all cleartext encrypts the data the same way everywhere.
+Network traffic security
+Once the sensitive data is encrypted, we're not terribly concerned about disclosure (especially inside the company network), but while it's in the clear we must take steps to insure that it's not intercepted while in transit.
+This seems of particular concern when considering the many telnet-like terminals that access the main system, both locally and from a remote call center. Sniffing card numbers in transit seems like a risk that ought to be mitigated with (perhaps) use of encrypted protocols such as SSH.
+Secure code deployment and source audits
+Though the private key may well be protected, one possible attack on the system could be an input service that not only crypted the data properly, but also squirreled away the sensitive data in cleartext for fraudulent use. It's bulk theft in slow motion: it doesn't achieve the entire customer database, but it does get very fresh data at whatever pace new orders are generated.
+This threat is most likely perpetrated by development staff with access to the source code, and it can be partly mitigated by regular inspection of the sensitive parts of the code by others. This does not rule out collusion among developers, but it raises the bar substantially.
+But mere source-code inspection may not be sufficient: a dishonest developer could create this fraudulent entry module, deploy the illicit binary throughout the enterprise, and then hide/destroy the source code. This could leave the illicit data collection quietly in place for a long time, up until the next routine modification of the input module replaced the illicit module with a clean one. But it would nevertheless be undetected even after the fact.
+The only real counter to this is a secure deployment mechanism that does not permit direct distribution of binaries at all (at least not by the developers): instead, source code is checked into the repository, and deployment is only made from code directly checked out of the repository.
+Misuse of protected data
+The fact that the data is encrypted need not stop it from being abused: an insider could create an order, populate it with crypted (but valid) data, and send it through the system. By attaching it to a custom ship-to address, these orders could be routed through the system indefinitely until it was detected by a consumer whose card was used fraudulently.
+It's curious to note that the one abusing the card may very well never have seen the actual card number, so there would be no particular reason to cancel the card. It would be amusing to consider trying to convince the consumer and/or Visa of this.
+Expiration of historical data
+As previously mentioned, keychange may occur at various times, and provisions must be made to account for this for data that must be recovered in the future.
+However, at some point we can be sure that this secured data won't ever be used again and ought to actively dispose of it. For instance, some amount of time after an order has been fulfilled (a year, perhaps?) the credit card data won't ever be used again. This is independent of which key was used to encrypt the data: it's simply data that won't ever need to be decrypted again for any purpose.
+This never-to-be-used data is nevertheless at risk for exposure, and this suggests proactive steps to mitigate that risk. One consideration is to sweep the database at regular intervals and replace expired crypted information with placeholder data.
+A special form of the protected format might mark this data as expired so that it fits the general structure, but is recognized as such.
+
+
+11.Other issues
+Due to the specifics of the customer's infrastructure and business needs, many of the excellent suggestions we've received are not directly used by this project, but were too good to omit entirely. We'll touch on some of them here.
+
+Store the secure data in an "object".
+Clearly there are multiple parts of the sensitive data: the type, the crypted data, display string, and perhaps other associated data. This strongly lends itself to storing in a "smarter" structure than just a string that must be parsed. Many databases support this, and it certainly does seem good to leverage this higher-level structure when it's availble.
+Split the CC number into different parts
+It's been suggested to save (say) the last few digits in the natural place — the order record, perhaps — and the rest in a more secure location. This would allow the application to manipulate its data without really worrying about the security.
+We understand there are existing systems that work this way, and they certainly have merit, but in a distributed system like ours, this approach would not provide sufficient security. This sensitive data has to exist on a webserver and in retail stores, and there is not guaranteed fulltime connectivity back to the main office. The system cannot be designed to simply not work if the network is down, so we're still left with the issues of protecting the data in the remote location.
+Were the system much more centralized, with essentially one application, it would be much more amenable to a data-distributed solution of this nature.
+Database column security
+We've had mixed reports on this: many feel that restricting access to the secure column is a reasonably idea, while others find it to be a maintenance nightmare. Our feeling is mixed on this.
+It seems reasonable to essentially deny all ordinary users the ability to SELECT that column, granting it only to the entities (stored procedures? pseudo-users?) that talk directly to the bank. This would foil most routine attempts by ordinary users to access this data, but it would still be available to all the database administrators.
+This approach would also not help secure the data that must be stored remotely. Again, systems which are less distributed could make more use of this.
+Communications Channel Security
+We've specifically left out the issue of communications security, because that will be addressed elsewhere by the customer, but we can touch on a few points here.
+If the VPN goes from router to router, transit from remotes to HQ are secured, but traffic internal to these networks is not:
+[Secure/Insecure Communications]
+
+This is not just a matter for concern about "inside jobs"; if a worker's workstation is compromised by a Trojan, it's common to see network sniffers as part of the payload. This could unwittingly recruit office staff in the disclosure.
+This suggests several things:
+Employing Ethernet switches (as opposed to hubs) to reduce (but not eliminate!) the ability of one — insider or not — to sniff local traffic.
+For traffic types that support it, use end-to-end encryption. The most obvious example is setting up call-center operators (both local and remote) to use Secure Shell instead of telnet. Even if one uses free ssh clients (such as putty) and free ssh servers (such as OpenSSH), there are nevertheless performance issues that arise when dealing with large number of encrypted sessions. This may militate against using this kind of solution. We've heard it suggested to use Telnet with TLS support (encryption, but not authentication), which may be a good compromise.
+Encrypting the data at the remotes — as we have suggested in this paper — means that only crypted data is sent over the insecure links. Insecure links won't really matter so much.
+
+
+
+12.It's been suggested that it's cryptographically incorrect to provide cleartext and ciphertext for the same data, because it provides an attacker with data to fool with. The scheme presented here does this by way of the display string including the last four digits of the credit card number: this is also presented in ciphertext.
+
+One solution is to omit the display digits from the crypted text, so that the machine talking to the CC processor would have to decode the crypted text (which did not include the last four digits), and append the digits of the display string.
+
+This has the effect of not storing the same data both ways, making it much more difficult to take advantage of this factor.
+
+
+

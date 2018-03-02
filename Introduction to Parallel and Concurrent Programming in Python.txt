@@ -1,0 +1,568 @@
+
+
+https://code.tutsplus.com/articles/introduction-to-parallel-and-concurrent-programming-in-python--cms-28612
+https://dzone.com/articles/example-of-parallelism-and-concurrency-in-python
+https://www.toptal.com/python/beginners-guide-to-concurrency-and-parallelism-in-python
+
+******************************  ****************************  **************************
+Global Interpreter Lock the GIL is a mutex that makes things thread-safe. The GIL makes it easy to integrate with external libraries that are not thread-safe, and it makes non-parallel code faster. Due to the GIL, we can't achieve true parallelism via multithreading. Basically, two different native threads of the same process can't run Python code at once.
+
+The main difference here is in the result of the multithreaded approach. This time it performs very similarly to the serial approach, and here's why: since it performs computations and Python doesn't perform real parallelism, the threads are basically running one after the other, yielding execution to one another until they all finish.
+
+Concurency using Threading
+threads = [threading.Thread(target=crunch_numbers) for _ in range(NUM_WORKERS)]
+[thread.start() for thread in threads]
+[thread.join() for thread in threads]
+
+Parallelism using Process
+processes = [multiprocessing.Process(target=crunch_numbers) for _ in range(NUM_WORKERS)]
+[process.start() for process in processes]
+[process.join() for process in processes]
+
+# Start all the workers
+[thread.start() for thread in threads]
+ 
+# Wait for all the tasks in the queue to be processed
+task_queue.join()
+
+multiprocessing provides a very similar interface to threading but for processes rather than threads.
+Remember that processes achieve true parallelism, but they are more expensive to create.
+Do not mistake parallel for concurrent. Remember that only the parallel approach takes advantage of multi-core processors, whereas concurrent programming intelligently schedules tasks so that waiting on long-running operations is done while in parallel doing actual computation.
+
+
+import os
+import time
+import threading
+import multiprocessing
+import logging
+import requests
+from queue import Queue
+from threading import Thread
+
+
+******************************* **************************** *****************************
+
+
+Introduction to Parallel and Concurrent Programming in Python
+
+
+
+Doing parallel programming in Python can prove quite tricky, though.
+
+In this tutorial, we're going to study why parallelism is hard especially in the Python context, and for that, we will go through the following:
+
+
+
+Why is parallelism tricky in Python (hint: it's because of the GIL—the global interpreter lock).
+Threads vs. Processes: Different ways of achieving parallelism. When to use one over the other?
+Parallel vs. Concurrent: Why in some cases we can settle for concurrency rather than parallelism.
+Building a simple but practical example using the various techniques discussed.
+
+
+
+Combining parallelism and concurrency is a viable and helpful option.
+
+In Python, you can have multiple thread pools inside each other. In other words, if you have a pool of threads and each thread has its own pool of threads, these multiple pools can have cascading functionalities. This model can be used in many applications (i.e., web scraping).
+
+
+For example, if you have a text file that contains multiple links, we need to download these links, and each file has a large size and can be downloaded in many small files, and if the file is HTML, you need to download the files of these links. The best example is web scraping. In this article, we will show an example of multiple thread pools that were downloaded from text files as links of files, and download each chunk of files in a separate thread.
+
+This article shows an example of combining parallelism and concurrency.
+
+
+
+Parallelism
+Parallelism means that all the threads start from the same point and each thread finishes independently on each other thread.
+
+For example, let's discuss downloading links. Say that a program has a file containing a number of file links to be downloaded. The concept of parallelism is applied by applying thread pools and downloading each file link independently.
+
+Concurrency
+C0ncurrency means that all the working threads don’t finish a task until all the other threads finish. In other words, all the threads start and finish at the same time.
+
+Each thread that downloads a file has a pool of threads to download part of the file and combines these chunks in one file. So, each thread is responsible for downloading part of the file. Therefore, threads don’t finish the task till all other threads finish their tasks and accumulate the file chunks into one file.
+
+The sub-thread pool has a number of threads equal to the number of file parts.
+
+
+Global Interpreter Lock
+
+The Global Interpreter Lock (GIL) is one of the most controversial subjects in the Python world. In CPython, the most popular implementation of Python, the GIL is a mutex that makes things thread-safe. The GIL makes it easy to integrate with external libraries that are not thread-safe, and it makes non-parallel code faster. This comes at a cost, though. Due to the GIL, we can't achieve true parallelism via multithreading. Basically, two different native threads of the same process can't run Python code at once.
+
+Things are not that bad, though, and here's why: stuff that happens outside the GIL realm is free to be parallel. In this category fall long-running tasks like I/O and, fortunately, libraries like numpy.
+
+
+Threads vs. Processes
+
+So Python is not truly multithreaded. But what is a thread? Let's take a step back and look at things in perspective.
+
+A process is a basic operating system abstraction. It is a program that is in execution—in other words, code that is running. Multiple processes are always running in a computer, and they are executing in parallel.
+
+A process can have multiple threads. They execute the same code belonging to the parent process. Ideally, they run in parallel, but not necessarily. The reason why processes aren't enough is because applications need to be responsive and listen for user actions while updating the display and saving a file.
+
+If that's still a bit unclear, here's a cheatsheet:
+
+PROCESSES
+THREADS
+Processes don't share memory
+Threads share memory
+
+Spawning/switching processes is expensive
+Spawning/switching threads is less expensive
+
+Processes require more resources
+Threads require fewer resources (are sometimes called lightweight processes)
+
+No memory synchronisation needed
+You need to use synchronisation mechanisms to be sure you're correctly handling the data
+
+
+
+Parallel vs. Concurrent
+
+Now we'll go one step further and dive into concurrency. Concurrency is often misunderstood and mistaken for parallelism. That's not the case. Concurrency implies scheduling independent code to be executed in a cooperative manner. Take advantage of the fact that a piece of code is waiting on I/O operations, and during that time run a different but independent part of the code.
+
+In Python, we can achieve lightweight concurrent behaviour via greenlets. From a parallelization perspective, using threads or greenlets is equivalent because neither of them runs in parallel. Greenlets are even less expensive to create than threads. Because of that, greenlets are heavily used for performing a huge number of simple I/O tasks, like the ones usually found in networking and web servers.
+
+Now that we know the difference between threads and processes, parallel and concurrent, we can illustrate how different tasks are performed on the two paradigms. Here's what we're going to do: we will run, multiple times, a task outside the GIL and one inside it. We're running them serially, using threads and using processes. Let's define the tasks:
+
+import os
+import time
+import threading
+import multiprocessing
+
+
+
+start_time = time.time()
+os.getpid()
+multiprocessing.current_process().name
+threading.current_thread().name
+threads = [threading.Thread(target=crunch_numbers) for _ in range(NUM_WORKERS)]
+[thread.start() for thread in threads]
+[thread.join() for thread in threads]
+
+processes = [multiprocessing.Process(target=crunch_numbers) for _ in range(NUM_WORKERS)]
+[process.start() for process in processes]
+[process.join() for process in processes]
+
+
+
+
+
+
+import os
+import time
+import threading
+import multiprocessing
+import logging
+import requests
+ 
+NUM_WORKERS = 4
+ 
+def only_sleep():
+    """ Do nothing, wait for a timer to expire """
+    print("PID: %s, Process Name: %s, Thread Name: %s" % (
+        os.getpid(),
+        multiprocessing.current_process().name,
+        threading.current_thread().name)
+    )
+    time.sleep(1)
+ 
+ 
+def crunch_numbers():
+    """ Do some computations """
+    print("PID: %s, Process Name: %s, Thread Name: %s" % (
+        os.getpid(),
+        multiprocessing.current_process().name,
+        threading.current_thread().name)
+    )
+    x = 0
+    while x < 10000000:
+        x += 1
+
+
+We've created two tasks. Both of them are long-running, but only crunch_numbers actively performs computations. Let's run only_sleep serially, multithreaded and using multiple processes and compare the results:
+
+## Run tasks serially
+start_time = time.time()
+for _ in range(NUM_WORKERS):
+    only_sleep()
+end_time = time.time()
+ 
+print("Serial time=", end_time - start_time)
+
+
+ 
+# Run tasks using threads
+start_time = time.time()
+threads = [threading.Thread(target=only_sleep) for _ in range(NUM_WORKERS)]
+[thread.start() for thread in threads]
+[thread.join() for thread in threads]
+end_time = time.time()
+ 
+print("Threads time=", end_time - start_time)
+ 
+# Run tasks using processes
+start_time = time.time()
+processes = [multiprocessing.Process(target=only_sleep()) for _ in range(NUM_WORKERS)]
+[process.start() for process in processes]
+[process.join() for process in processes]
+end_time = time.time()
+ 
+print("Parallel time=", end_time - start_time)
+
+
+
+
+Here's the output I've got (yours should be similar, although PIDs and times will vary a bit):
+
+PID: 95726, Process Name: MainProcess, Thread Name: MainThread
+PID: 95726, Process Name: MainProcess, Thread Name: MainThread
+PID: 95726, Process Name: MainProcess, Thread Name: MainThread
+PID: 95726, Process Name: MainProcess, Thread Name: MainThread
+Serial time= 4.018089056015015
+ 
+PID: 95726, Process Name: MainProcess, Thread Name: Thread-1
+PID: 95726, Process Name: MainProcess, Thread Name: Thread-2
+PID: 95726, Process Name: MainProcess, Thread Name: Thread-3
+PID: 95726, Process Name: MainProcess, Thread Name: Thread-4
+Threads time= 1.0047411918640137
+ 
+PID: 95728, Process Name: Process-1, Thread Name: MainThread
+PID: 95729, Process Name: Process-2, Thread Name: MainThread
+PID: 95730, Process Name: Process-3, Thread Name: MainThread
+PID: 95731, Process Name: Process-4, Thread Name: MainThread
+Parallel time= 1.014023780822754
+Here are some observations:
+
+In the case of the serial approach, things are pretty obvious. We're running the tasks one after the other. All four runs are executed by the same thread of the same process.
+
+Using processes we cut the execution time down to a quarter of the original time, simply because the tasks are executed in parallel. Notice how each task is performed in a different process and on the MainThread of that process.
+
+Using threads we take advantage of the fact that the tasks can be executed concurrently. The execution time is also cut down to a quarter, even though nothing is running in parallel. Here's how that goes: we spawn the first thread and it starts waiting for the timer to expire. We pause its execution, letting it wait for the timer to expire, and in this time we spawn the second thread. We repeat this for all the threads. At one moment the timer of the first thread expires so we switch execution to it and we terminate it. The algorithm is repeated for the second and for all the other threads. At the end, the result is as if things were run in parallel. You'll also notice that the four different threads branch out from and live inside the same process: MainProcess.
+
+
+
+Let's do the same routine but this time running the crunch_numbers task:
+
+
+start_time = time.time()
+for _ in range(NUM_WORKERS):
+    crunch_numbers()
+end_time = time.time()
+ 
+print("Serial time=", end_time - start_time)
+ 
+start_time = time.time()
+threads = [threading.Thread(target=crunch_numbers) for _ in range(NUM_WORKERS)]
+[thread.start() for thread in threads]
+[thread.join() for thread in threads]
+end_time = time.time()
+ 
+print("Threads time=", end_time - start_time)
+ 
+ 
+start_time = time.time()
+processes = [multiprocessing.Process(target=crunch_numbers) for _ in range(NUM_WORKERS)]
+[process.start() for process in processes]
+[process.join() for process in processes]
+end_time = time.time()
+ 
+print("Parallel time=", end_time - start_time)
+Here's the output I've got:
+
+PID: 96285, Process Name: MainProcess, Thread Name: MainThread
+PID: 96285, Process Name: MainProcess, Thread Name: MainThread
+PID: 96285, Process Name: MainProcess, Thread Name: MainThread
+PID: 96285, Process Name: MainProcess, Thread Name: MainThread
+Serial time= 2.705625057220459
+PID: 96285, Process Name: MainProcess, Thread Name: Thread-1
+PID: 96285, Process Name: MainProcess, Thread Name: Thread-2
+PID: 96285, Process Name: MainProcess, Thread Name: Thread-3
+PID: 96285, Process Name: MainProcess, Thread Name: Thread-4
+Threads time= 2.6961309909820557
+PID: 96289, Process Name: Process-1, Thread Name: MainThread
+PID: 96290, Process Name: Process-2, Thread Name: MainThread
+PID: 96291, Process Name: Process-3, Thread Name: MainThread
+PID: 96292, Process Name: Process-4, Thread Name: MainThread
+Parallel time= 0.8014059066772461
+
+
+
+The main difference here is in the result of the multithreaded approach. This time it performs very similarly to the serial approach, and here's why: since it performs computations and Python doesn't perform real parallelism, the threads are basically running one after the other, yielding execution to one another until they all finish.
+
+
+
+
+The Python Parallel/Concurrent Programming Ecosystem
+
+Python has rich APIs for doing parallel/concurrent programming. In this tutorial we're covering the most popular ones, but you have to know that for any need you have in this domain, there's probably something already out there that can help you achieve your goal. 
+
+In the next section, we'll build a practical application in many forms, using all of the libraries presented. Without further ado, here are the modules/libraries we're going to cover:
+
+threading: The standard way of working with threads in Python. It is a higher-level API wrapper over the functionality exposed by the _thread module, which is a low-level interface over the operating system's thread implementation.
+
+concurrent.futures: A module part of the standard library that provides an even higher-level abstraction layer over threads. The threads are modelled as asynchronous tasks.
+
+multiprocessing: Similar to the threading module, offering a very similar interface but using processes instead of threads.
+
+gevent and greenlets: Greenlets, also called micro-threads, are units of execution that can be scheduled collaboratively and can perform tasks concurrently without much overhead.
+
+celery: A high-level distributed task queue. The tasks are queued and executed concurrently using various paradigms like multiprocessing or gevent.
+
+
+
+
+Building a Practical Application
+
+Let's build an application that checks the uptime of websites. There are a lot of such solutions out there, the most well-known ones being probably Jetpack Monitor and Uptime Robot. The purpose of these apps is to notify you when your website is down so that you can quickly take action. Here's how they work:
+
+
+The application goes very frequently over a list of website URLs and checks if those websites are up.
+Every website should be checked every 5-10 minutes so that the downtime is not significant.
+Instead of performing a classic HTTP GET request, it performs a HEAD request so that it does not affect your traffic significantly.
+If the HTTP status is in the danger ranges (400+, 500+), the owner is notified.
+The owner is notified either by email, text-message, or push notification.
+
+
+Here's why it's essential to take a parallel/concurrent approach to the problem. As the list of websites grows, going through the list serially won't guarantee us that every website is checked every five minutes or so. The websites could be down for hours, and the owner won't be notified.
+
+
+
+
+# utils.py
+ 
+import time
+import logging
+import requests
+ 
+ 
+class WebsiteDownException(Exception):
+    pass
+ 
+ 
+def ping_website(address, timeout=20):
+    """
+    Check if a website is down. A website is considered down 
+    if either the status_code >= 400 or if the timeout expires
+     
+    Throw a WebsiteDownException if any of the website down conditions are met
+    """
+    try:
+        response = requests.head(address, timeout=timeout)
+        if response.status_code >= 400:
+            logging.warning("Website %s returned status_code=%s" % (address, response.status_code))
+            raise WebsiteDownException()
+    except requests.exceptions.RequestException:
+        logging.warning("Timeout expired for website %s" % address)
+        raise WebsiteDownException()
+         
+ 
+def notify_owner(address):
+    """ 
+    Send the owner of the address a notification that their website is down 
+     
+    For now, we're just going to sleep for 0.5 seconds but this is where 
+    you would send an email, push notification or text-message
+    """
+    logging.info("Notifying the owner of %s website" % address)
+    time.sleep(0.5)
+     
+ 
+def check_website(address):
+    """
+    Utility function: check if a website is down, if so, notify the user
+    """
+    try:
+        ping_website(address)
+    except WebsiteDownException:
+        notify_owner(address)
+
+
+We'll actually need a website list to try our system out. Create your own list or use mine:
+
+# websites.py
+ 
+WEBSITE_LIST = [
+    'http://envato.com',
+    'http://amazon.co.uk',
+    'http://amazon.com',
+    'http://facebook.com',
+    'http://google.com',
+    'http://google.fr',
+    'http://google.es',
+    'http://google.co.uk',
+    'http://internet.org',
+    'http://gmail.com',
+    'http://stackoverflow.com',
+    'http://github.com',
+    'http://heroku.com',
+    'http://really-cool-available-domain.com',
+    'http://djangoproject.com',
+    'http://rubyonrails.org',
+    'http://basecamp.com',
+    'http://trello.com',
+    'http://yiiframework.com',
+    'http://shopify.com',
+    'http://another-really-interesting-domain.co',
+    'http://airbnb.com',
+    'http://instagram.com',
+    'http://snapchat.com',
+    'http://youtube.com',
+    'http://baidu.com',
+    'http://yahoo.com',
+    'http://live.com',
+    'http://linkedin.com',
+    'http://yandex.ru',
+    'http://netflix.com',
+    'http://wordpress.com',
+    'http://bing.com',
+]
+
+
+
+Normally, you'd keep this list in a database along with owner contact information so that you can contact them. Since this is not the main topic of this tutorial, and for the sake of simplicity, we're just going to use this Python list.
+
+
+Serial Approach
+First, let's try the serial approach and see how badly it performs. We'll consider this the baseline.
+
+# serial_squirrel.py
+ 
+import time
+ 
+ 
+start_time = time.time()
+ 
+for address in WEBSITE_LIST:
+    check_website(address)
+         
+end_time = time.time()        
+ 
+print("Time for SerialSquirrel: %ssecs" % (end_time - start_time))
+ 
+# WARNING:root:Timeout expired for website http://really-cool-available-domain.com
+# WARNING:root:Timeout expired for website http://another-really-interesting-domain.co
+# WARNING:root:Website http://bing.com returned status_code=405
+# Time for SerialSquirrel: 15.881232261657715secs
+
+
+
+Threading Approach
+We're going to get a bit more creative with the implementation of the threaded approach. We're using a queue to put the addresses in and create worker threads to get them out of the queue and process them. We're going to wait for the queue to be empty, meaning that all the addresses have been processed by our worker threads.
+
+
+# threaded_squirrel.py
+ 
+import time
+from queue import Queue
+from threading import Thread
+ 
+NUM_WORKERS = 4
+task_queue = Queue()
+ 
+def worker():
+    # Constantly check the queue for addresses
+    while True:
+        address = task_queue.get()
+        check_website(address)
+         
+        # Mark the processed task as done
+        task_queue.task_done()
+ 
+start_time = time.time()
+         
+# Create the worker threads
+threads = [Thread(target=worker) for _ in range(NUM_WORKERS)]
+ 
+# Add the websites to the task queue
+[task_queue.put(item) for item in WEBSITE_LIST]
+ 
+# Start all the workers
+[thread.start() for thread in threads]
+ 
+# Wait for all the tasks in the queue to be processed
+task_queue.join()
+ 
+         
+end_time = time.time()        
+ 
+print("Time for ThreadedSquirrel: %ssecs" % (end_time - start_time))
+ 
+# WARNING:root:Timeout expired for website http://really-cool-available-domain.com
+# WARNING:root:Timeout expired for website http://another-really-interesting-domain.co
+# WARNING:root:Website http://bing.com returned status_code=405
+# Time for ThreadedSquirrel: 3.110753059387207secs
+
+
+
+
+Conclusions
+
+I hope this has been an interesting journey for you and a good introduction to the world of parallel/concurrent programming in Python. This is the end of the journey, and there are some conclusions we can draw:
+
+There are several paradigms that help us achieve high-performance computing in Python.
+For the multi-threaded paradigm, we have the threading and concurrent.futures libraries.
+multiprocessing provides a very similar interface to threading but for processes rather than threads.
+Remember that processes achieve true parallelism, but they are more expensive to create.
+Remember that a process can have more threads running inside it.
+Do not mistake parallel for concurrent. Remember that only the parallel approach takes advantage of multi-core processors, whereas concurrent programming intelligently schedules tasks so that waiting on long-running operations is done while in parallel doing actual computation.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

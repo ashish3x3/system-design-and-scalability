@@ -1,0 +1,411 @@
+
+
+Design a Garbage Collection System (Part I)
+
+
+tell me about what you know about garbage collection
+
+All the objects which are created dynamically (using new in C++ and Java) are allocated memory in the heap. If we go on creating objects we might get Out Of Memory error, since it is not possible to allocate heap memory to objects. So we need to clear heap memory by releasing memory for all those objects which are no longer referenced by the program (or the unreachable objects) so that the space is made available for subsequent new objects. This memory can be released by the programmer itself but it seems to be an overhead for the programmer, here garbage collection comes to our rescue, and it automatically releases the heap memory for all the unreferenced objects.
+
+Back to the question, garbage collection is a system that automatically recycles unused memory in programming languages. A most popular example is Java. When writing Java, you don’t need to control how memory is allocated and recycled. Everything happens in the background.
+
+The most obvious benefit of having garbage collection is that it makes programming much easier. Remember when we write C++, we need to be extremely careful about pointers and memory allocation. By handling all of these by the program itself, developers can focus more on the core logic.
+
+
+
+dangling pointers
+already freed (double free)
+memory leak
+
+More specifically, garbage collection helps developers avoid several memory problems. First, it prevents accessing dangling pointers that point to an object that no longer exists. Secondly, it prevents freeing a region of memory that is already freed (double free). Last, it avoids memory leak, which means an unreachable region of memory that can never be freed. All of them are common pitfalls when developers try to manage memory manually.
+
+
+consumes computing resources
+memory to store the status of objects
+
+The biggest disadvantage is that garbage collection consumes computing resources. Think about this, not only does garbage collection need to implement logics to recycle memory, it also consumes memory to store the status of objects. In some naive garbage collection implementation, the recycle process may even block the program potentially.
+
+
+more flexibility and much easier to optimize
+
+Another way to think about this is that without garbage collection, the developer has the full control over how memory is used, which gives the program much more flexibility and much easier to optimize. That’s one of the reasons why C++ is more efficient. Of course, it’s also prone to error.
+
+
+Design a simple garbage collection system
+
+Since the essence of a garbage collection system is to recycle unused memory in the program, the key is to identify which piece of memory is unused. More specifically, we should search for variables that are no longer referenced.
+
+
+
+If you think about all the objects (variables) in a program, it’s like a directional graph that each object references other objects and at the same time is also referenced by some objects. As a result, unreachable objects, which are those without any reference, should be recycled. As you can see, the big problem has been simplified to a graph problem – find unreachable nodes in a graph.
+
+
+
+Naive mark-and-sweep
+In fact, the above solution is just the most naive approach, which is called mark-and-sweep. To begin with, the garbage collection system does a tree traversal following object references and mark all the visited objects. In the second phase, for all the unreachable objects, free their memory.
+
+But how does the system track those unreachable objects? One easy way is to keep a set of all the objects in the program. Whenever a new object is initialized, add it to the pool.
+
+
+It allows developers care less about memory management and write more robust code.
+may affect the performance and provide less flexibility when working with memory.
+
+In our previous post, we’ve been talking about the basic concept of garbage collection, which is a system that automatically recycles unused memory in programming languages. What’s cool about garbage collection is quite obvious. It allows developers care less about memory management and write more robust code. On the flip side, it may affect the performance and provide less flexibility when working with memory.
+
+
+Naive mark-and-sweep Problems:
+
+entire system must be suspended during garbage collection.
+
+The most notable problem is that the entire system must be suspended during garbage collection. In other words, once in a while, the problem will be frozen when doing garbage collection and no mutation of the working set can be allowed. Thus, it’ll significantly affect the performance of time-critical applications.
+
+
+
+Improvement
+Given the performance issue of mark-and-sweep, one modern garbage collection system takes a slightly different approach – Tri-color making.
+
+Let me briefly introduce the algorithm. In a nutshell, the system marks all the objects into three colors:
+
+White – objects that have no reference and should be recycled.
+Black – reachable objects that shouldn’t be recycled. Black objects have no reference to white objects.
+Gray – objects that are reachable from roots and yet to be scanned for references to white.
+Initially, all the objects that are referenced from roots are in gray and the white sets include everything else (black is empty). Each time the system picks an object from gray to black and move all its references from white to gray. In the end, gray becomes empty and all white objects are recycled.
+
+The most notable advantage is that the system can do garbage collection on the fly, which is accomplished by marking objects as they are allocated and during mutation. Thus, the program won’t be halted for long time and performance gets improved.
+
+
+
+Reference counting
+So what are other ways to design a garbage collection system that won’t freeze the program?
+
+A natural solution is reference counting and the idea is extremely simple. The core concept of garbage collection is when an object has zero reference, we should recycle it as soon as possible. So why not just keep track of the reference count for each object?
+
+The reference counting system will keep a counter for each object that counts the number of references it has. The counter is incremented when a reference to it is created, and decremented when a reference is destroyed. When the counter is 0, the object should be recycled. Obviously, the system can do the garbage collection on the fly since it’s able to release the memory at the right time.
+
+
+Disadvantage of reference counting
+Apparently, the reference counter adds space overhead to the whole system. Since every single object needs additional storage for its reference count, the overall space needed can be increased significantly without any optimization.
+
+Another problem is the speed overhead. Since the system needs to keep updating the counter, every operation in the program requires modification of one or more reference counters. Another way to understand this is that instead of freeze the program to recycle objects, reference counting system divides the overhead into every small operation. Since you can’t get everything for free, you need to decide if you want every operation becomes slightly slower or stop the entire program once in a while.
+
+In addition, cycles can also be a problem of reference counting. If two objects reference each other, they will never be recycled. If you have experience with obj-c, you should already know the solution. Some languages introduce the concept of “weak reference” for the back pointers that creates the cycle. It is a special reference object whose existence does not increment the reference count of the referent object.
+
+
+
+
+
+
+************************* SOME DESIGN CHOICES TO MAKE *****************************
+
+What triggers the garbage collection process?
+It depends. Usually the object allocator could trigger GC, e.g. get some memory and if none is available, do a GC.
+
+How "stopping the world" is actually implemented.
+"Stop the world" is a property of GCs (the simplest ones, which complete the GC while application code -a.k.a. mutator- is stopped).
+
+missing questions
+
+You forgot several questions.
+
+What is a closure, and why functional languages want a GC? Read also about continuations....
+How to make a multi-threaded friendly GC?
+
+
+
+
+
+
+
+************************* STACK OVERFLOW DEBATE : WHY C++ DOSEN"T HAVE GC *************************************
+
+
+There are currently 2 families of GC that are widely deployed:
+
+Mark-And-Sweep kind :faster (less impact on overall performance) but it suffers from a "freeze the world" 
+
+Reference-Counting kind :  adds overhead, especially in Multi-Threading environments because you need to have an atomic count
+
+The Mark And Sweep is faster (less impact on overall performance) but it suffers from a "freeze the world" syndrom: ie when the GC kicks in, everything else is stopped until the GC has made its cleanup. If you wish to build a server that answers in a few milliseconds... some transactions will not live up to your expectations :)
+
+
+The problem of Reference Counting is different: reference-counting adds overhead, especially in Multi-Threading environments because you need to have an atomic count. Furthermore there is the problem of reference cycles so you need a clever algorithm to detect those cycles and eliminate them (generally implement by a "freeze the world" too, though less frequent). In general, as of today, this kind (even though normally more responsive or rather, freezing less often) is slower than the Mark And Sweep.
+
+
+
+It required a separate thread for the GC (typical).
+Eiffel implementers that were trying to implement a Reference Counting Garbage Collector that would have a similar global performance to Mark And Sweep without the "Freeze The World" aspect.
+
+
+ Resources Acquisition Is Initialization
+
+ It's a common idiom in C++ that you will wrap the ownership of resources within an object to ensure that they are properly released. It's mostly used for memory since we don't have garbage collection, but it's also useful nonetheless for many other situations:
+
+locks (multi-thread, file handle, ...)
+connections (to a database, another server, ...)
+
+The idea is to properly control the lifetime of the object:
+
+it should be alive as long as you need it
+it should be killed when you're done with it
+The problem of GC is that if it helps with the former and ultimately guarantees that later... this "ultimate" may not be sufficient. If you release a lock, you'd really like that it be released now, so that it does not block any further calls!
+
+Languages with GC have two work arounds:
+
+don't use GC when stack allocation is sufficient: it's normally for performance issues, but in our case it really helps since the scope defines the lifetime
+
+
+
+
+4. What's the solution ?
+
+There is no silver bullet, but as always, it's definitely feasible. In the absence of GC one need to be clear on ownership:
+
+prefer having a single owner at one given time, if possible
+if not, make sure that your class diagram does not have any cycle pertaining to ownership and break them with subtle application of weak_ptr
+
+
+
+
+Automatic garbage collectors aren't so much a problem of performance (you can always buy more server) it's a question of predicatable performance.
+Not knowing when the GC is going to kick in is like employing a narcoleptic airline pilot, most of the time they are great - but when you really need responsiveness!
+
+
+
+***************************** MARH & SWEEP ALOGORITHM **************************************
+
+
+Mark and Sweep Algorithm
+
+Any garbage collection algorithm must perform 2 basic operations. One, it should be able to detect all the unreachable objects and secondly, it must reclaim the heap space used by the garbage objects and make the space available again to the program.
+The above operations are performed by Mark and Sweep Algorithm in two phases:
+1) Mark phase
+2) Sweep phase
+Mark Phase
+When an object is created, its mark bit is set to 0(false). In the Mark phase, we set the marked bit for all the reachable objects (or the objects which a user can refer to) to 1(true). Now to perform this operation we simply need to do a graph traversal, a depth first search approach would work for us. Here we can consider every object as a node and then all the nodes (objects) that are reachable from this node (object) are visited and it goes on till we have visited all the reachable nodes.
+
+Root is a variable that refer to an object and is directly accessible by local variable. We will assume that we have one root only.
+We can access the mark bit for an object by: markedBit(obj).
+Algorithm -Mark phase:
+
+Mark(root)
+    If markedBit(root) = false then
+        markedBit(root) = true
+        For each v referenced by root
+             Mark(v)
+Note: If we have more than one root, then we simply have to call Mark() for all the root variables.
+
+
+
+
+
+
+Sweep Phase
+As the name suggests it “sweeps” the unreachable objects i.e. it clears the heap memory for all the unreachable objects. All those objects whose marked value is set to false are cleared from the heap memory, for all other objects (reachable objects) the marked bit is set to false.
+Now the mark value for all the reachable objects is set to false, since we will run the algorithm (if required) and again we will go through the mark phase to mark all the reachable objects.
+
+Algorithm – Sweep Phase
+
+Sweep()
+For each object p in heap
+    If markedBit(p) = true then
+        markedBit(p) = false
+    else
+        heap.release(p)
+The mark-and-sweep algorithm is called a tracing garbage collector because is traces out the entire collection of objects that are directly or indirectly accessible by the program.
+
+
+
+
+Advantages of Mark and Sweep Algorithm
+
+It handles the case with cyclic references, even in case of a cycle, this algorithm never ends up in an infinite loop.
+There are no additional overheads incurred during the execution of the algorithm.
+Disadvantages of Mark and Sweep Algorithm
+
+The main disadvantage of the mark-and-sweep approach is the fact that that normal program execution is suspended while the garbage collection algorithm runs.
+Other disadvantage is that, after the Mark and Sweep Algorithm is run several times on a program, reachable objects end up being separated by many, small unused memory regions. Look at the below figure for better understanding.
+Figure:
+	internal framgmentation type..gap between used memory regions, affect coherence caching
+
+
+	Here white blocks denote the free memory, while the grey blocks denote the memory taken by all the reachable objects.
+	Now the free segments (which are denoted by white color) are of varying size let’s say the 5 free segments are of size 1, 1, 2, 3, 5 (size in units).
+	Now we need to create an object which takes 10 units of memory, now assuming that memory can be allocated only in contiguous form of blocks, the creation of object isn’t possible although we have an available memory space of 12 units and it will cause OutOfMemory error. This problem is termed as “Fragmentation”. We have memory available in “fragments” but we are unable to utilize that memory space.
+	We can reduce the fragmentation by compaction; we shuffle the memory content to place all the free memory blocks together to form one large block. Now consider the above example, after compaction we have a continuous block of free memory of size 12 units so now we can allocate memory to an object of size 10 units.
+
+
+
+************************************* JAVA WAY ************************************************
+
+Unreachable objects : An object is said to be unreachable iff it doesn’t contain any reference to it. Also note that objects which are part of island of isolation are also unreachable.
+Integer i = new Integer(4);
+// the new Integer object is reachable  via the reference in 'i' 
+i = null;
+// the Integer object is no longer reachable. 
+
+
+Eligibility for garbage collection : An object is said to be eligible for GC(garbage collection) iff it is unreachable. In above image, after i = null; integer object 4 in heap area is eligible for garbage collection
+
+
+Even though programmer is not responsible to destroy useless objects but it is highly recommended to make an object unreachable(thus eligible for GC) if it is no longer required.
+There are generally four different ways to make an object eligible for garbage collection.
+
+Nullifying the reference variable
+Re-assigning the reference variable
+Object created inside method
+Island of Isolation
+
+
+Once we made object eligible for garbage collection, it may not destroy immediately by garbage collector. Whenever JVM runs Garbage Collector program, then only object will be destroyed. But when JVM runs Garbage Collector, we can not expect.
+We can also request JVM to run Garbage Collector. There are two ways to do it :
+Using System.gc() method : System class contain static method gc() for requesting JVM to run Garbage Collector.
+Using Runtime.getRuntime().gc() method : Runtime class allows the application to interface with the JVM in which the application is running. Hence by using its gc() method, we can request JVM to run Garbage Collector.
+// Java program to demonstrate requesting 
+// JVM to run Garbage Collector
+public class Test
+{
+    public static void main(String[] args) throws InterruptedException
+    {
+        Test t1 = new Test();
+        Test t2 = new Test();
+         
+        // Nullifying the reference variable
+        t1 = null;
+         
+        // requesting JVM for running Garbage Collector
+        System.gc();
+         
+        // Nullifying the reference variable
+        t2 = null;
+         
+        // requesting JVM for running Garbage Collector
+        Runtime.getRuntime().gc();
+     
+    }
+     
+    @Override
+    // finalize method is called on object once 
+    // before garbage collecting it
+    protected void finalize() throws Throwable
+    {
+        System.out.println("Garbage collector called");
+        System.out.println("Object garbage collected : " + this);
+    }
+}
+Run on IDE
+Output:
+
+Garbage collector called
+Object garbage collected : Test@46d08f12
+Garbage collector called
+Object garbage collected : Test@481779b8
+Note :
+
+There is no guarantee that any one of above two methods will definitely run Garbage Collector.
+The call System.gc() is effectively equivalent to the call : Runtime.getRuntime().gc()
+Finalization
+
+Just before destroying an object, Garbage Collector calls finalize() method on the object to perform cleanup activities. Once finalize() method completes, Garbage Collector destroys that object.
+finalize() method is present in Object class with following prototype.
+protected void finalize() throws Throwable
+Based on our requirement, we can override finalize() method for perform our cleanup activities like closing connection from database.
+
+Note :
+
+The finalize() method called by Garbage Collector not JVM. Although Garbage Collector is one of the module of JVM.
+Object class finalize() method has empty implementation, thus it is recommended to override finalize() method to dispose of system resources or to perform other cleanup.
+The finalize() method is never invoked more than once for any given object.
+If an uncaught exception is thrown by the finalize() method, the exception is ignored and finalization of that object terminates.
+
+
+
+Island of Isolation in Java
+http://www.geeksforgeeks.org/island-of-isolation-in-java/
+
+.Object 1 references Object 2 and Object 2 references Object 1. Neither Object 1 nor Object 2 is referenced by any other object. That’s an island of isolation.
+Basically, an island of isolation is a group of objects that reference each other but they are not referenced by any active object in the application. Strictly speaking, even a single unreferenced object is an island of isolation too.
+Example:
+
+public class Test
+{
+    Test i;
+    public static void main(String[] args)  
+    {
+        Test t1 = new Test();
+        Test t2 = new Test();
+          
+        // Object of t1 gets a copy of t2
+        t1.i = t2;
+      
+        // Object of t2 gets a copy of t1
+        t2.i = t1;
+          
+        // Till now no object eligible
+        // for garbage collection 
+        t1 = null;
+         
+        //now two objects are eligible for
+        // garbage collection 
+        t2 = null;
+         
+        // calling garbage collector
+        System.gc();
+        
+    }
+ 
+    @Override
+    protected void finalize() throws Throwable 
+    { 
+        System.out.println("Finalize method called"); 
+    }
+}
+
+
+
+Before destructing an object, Garbage Collector calls finalize method at most one time on that object.
+The reason finalize method called two times in above example because two objects are eligible for garbage collection.This is because we don’t have any external references to t1 and t2 objects after executing t2=null.
+All we have is only internal references(which is in instance variable i of class Test) to them of each other. There is no way we can call instance variable of both objects. So, none of the objects can be called again.
+
+Till t2.i = t1 : Both the objects have external references t1 and t2.
+
+
+t1 = null : Both the objects can be reached via t2.i and t2 respectively.
+
+t2 = null: No way to reach any of the objects.
+
+
+Now, both the objects are eligible for garbage collection as there is no way we can call them. This is popularly known as Island of Isolation.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

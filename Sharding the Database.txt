@@ -1,0 +1,167 @@
+
+
+https://www.educative.io/collection/page/5668639101419520/5649050225344512/5146118144917504
+
+
+
+
+Database Sharding (made popular by Google) is a method of horizontal partitioning in a database and the approach is highly scalable and provides improved throughput and overall performance.  Database Sharding can be defined as a “shared-nothing” partitioning scheme for large databases across a number of servers each with their own CPU, memory and disk. Simply put, break the database into smaller chunks called “shards” (each becoming a smaller database by itself) and spread those across a number of distributed servers.
+
+The main advantage of Database Sharding approach is improved scalability, growing in a near-linear fashion as more servers are added to the network. Other benefits of having smaller databases are:
+
+Easier to Manage – smaller databases means that the regular activities like backup, database optimization etc. can be handled independently and in parallel.
+Faster – Smaller databases mean that the ratio of memory to disk is improved resulting in reduced disk I/O, less contention for resources and in turn the performance as well as throughput improves.
+Less Cost – Lower cost open source databases which doesn’t require licensing per server results in direct cost savings. Also unlike traditional partitioning techniques which rely on shared facilities (like expensive SANs), sharding typically involves commodity hardware which again translates to significant cost savings.
+Sharding typically uses a distributed hash table (DHT) that provides a lookup service similar to a hash table where any participating node an efficiently retrieve the value associated with a given key.
+
+
+
+The characteristics emphasized by DHT are Decentralization (without any central co-ordination), Scalability (function efficiently with thousands of nodes), Fault tolerance (reliable even with nodes continuously joining, leaving and failing). These goals are achieved using a key technique so that any one node needs to coordinate with only a few other nodes in the system – so that only a limited amount of work needs to be done for each change in membership. This allows a DHT to scale to extremely large numbers of nodes and to handle continual node arrivals, departures, and failures.
+
+
+Most DHTs use consistent hashing to map keys to nodes. This technique employs a function δ(k1,k2) which defines an abstract notion of the distance from key k1 to key k2. Each node is assigned a single key called its identifier (ID). A node with ID ix owns all the keys km for which ix is the closest ID, measured according to δ(km,in). Consistent hashing has the property that removal or addition of one node changes only the set of keys owned by the nodes with adjacent IDs, and leaves all other nodes unaffected.
+
+
+
+Every shard will have its own slave to scale the reads
+
+
+
+
+
+Conceptually, Sharding broadly falls under three categories:
+
+1. Vertical partitioning – All the data related to a specific feature of a product are stored on the same machines. Storing infrequently used or very wide columns on a physically different device is an example. It is also referred to as “row splitting” – as the row is split by its columns.
+
+2. Key-based partitioning – In this, the part of the data itself is used to do the partitioning. Most common approach is to use a one-way hashing algorithm to map the data to be accessed to one of the shards that store it. Natural hashes can as well be used – in case of numbers as key, the key mod N (number of shards), in case of dates, it could be based on time interval, could be based on first letter of the name, and for amounts it could be based on the range of value. Similarly a list of values can be used to assign a partition – e.g., list of countries grouped into continents.
+
+3. Directory-based partitioning – In this scheme, a lookup table that keeps track of which data is stored in which shard is maintained in the cluster. This approach has two drawbacks – the directory can become a single point of failure and there is a performance overhead as the directory has to be accessed every time to locate the shard.
+
+
+
+
+The distributed nature of multiple shard databases increases the criticality of a well-designed fault-tolerant and reliable approach which makes the following necessary:
+
+Database Shard redundancy – ensuring at least two “live” copies of each shard are available in the event of an outage or server failure. It going without saying that multiple copies in turn require a high-performance, efficient and reliable replication.
+Automated backups of individual database shards
+Redundancy at various levels, involving cost-effective hardware
+Automated failover when an outage or server failure occurs
+Distributed queries, that can perform faster and use parallel processing of interim results on each shard server, need the ability of the system to handle them in a seamless manner for the application (MapReduce is one such example).
+
+
+
+a. Horizontal partitioning: In this scheme, we put different rows into different tables. For example, if we are storing different places in a table, we can decide that locations with ZIP codes less than 10000 are stored in one table, and places with ZIP codes greater than 10000 are stored in a separate table. This is also called a range based sharding, as we are storing different ranges of data in separate tables.
+
+The key problem with this approach is that if the value whose range is used for sharding isn’t chosen carefully, then the partitioning scheme will lead to unbalanced servers. In the previous example, splitting location based on their zip codes assumes that places will be evenly distributed across the different zip codes. This assumption is not valid as there will be a lot of places in a thickly populated area like Manhattan compared to its suburb cities.
+
+b. Vertical Partitioning: In this scheme, we divide our data to store tables related to a specific feature to their own server. For example, if we are building Instagram like application, where we need to store data related to users, all the photos they upload and people they follow, we can decide to place user profile information on one DB server, friend lists on another and photos on a third server.
+
+Vertical partitioning is straightforward to implement and has a low impact on the application. The main problem with this approach is that if our application experiences additional growth, then it may be necessary to further partition a feature specific DB across various servers (e.g. it would not be possible for a single server to handle all the metadata queries for 10 billion photos by 140 million users).
+
+c. Directory Based Partitioning: A loosely coupled approach to work around issues mentioned in above schemes is to create a lookup service which knows your current partitioning scheme and abstracts it away from the DB access code. So, to find out where does a particular data entity resides, we query our directory server that holds the mapping between each tuple key to its DB server. This loosely coupled approach means we can perform tasks like adding servers to the DB pool or change our partitioning scheme without having to impact your application.
+
+
+2. Partitioning Criteria
+a. Key or Hash-based partitioning: Under this scheme, we apply a hash function to some key attribute of the entity we are storing, that yields the partition number. For example, if we have 100 DB servers and our ID is a numeric value that gets incremented by one, each time a new record is inserted. In this example, the hash function could be ‘ID % 100’, which will give us the server number where we can store/read that record. This approach should ensure a uniform allocation of data among servers. The fundamental problem with this approach is that it effectively fixes the total number of DB servers, since adding new servers means changing the hash function which would require redistribution of data and downtime for the service. A workaround for this problem is to use Consistent Hashing.
+
+b. List partitioning: In this scheme, each partition is assigned a list of values, so whenever we want to insert a new record, we will see which partition contains our key and then store it there. For example, we can decide all users living in Iceland, Norway, Sweden, Finland or Denmark will be stored in a partition for the Nordic countries.
+
+c. Round-robin partitioning: This is a very simple strategy that ensures uniform data distribution. With ‘n’ partitions, the ‘i’ tuple is assigned to partition (i mod n).
+
+
+d. Composite partitioning: Under this scheme, we combine any of above partitioning schemes to devise a new scheme. For example, first applying a list partitioning and then a hash based partitioning. Consistent hashing could be considered a composite of hash and list partitioning where the hash reduces the key space to a size that can be listed.
+
+
+3. Common Problems of Sharding
+
+
+On a sharded database, there are certain extra constraints on the different operations that can be performed. Most of these constraints are due to the fact that, operations across multiple tables or multiple rows in the same table, will no longer run on the same server. Below are some of the constraints and additional complexities introduced by sharding:
+
+a. Joins and Denormalization: Performing joins on a database which is running on one server is straightforward, but once a database is partitioned and spread across multiple machines it is often not feasible to perform joins that span database shards. Such joins will not be performance efficient since data has to be compiled from multiple servers. A common workaround for this problem is to denormalize the database so that queries that previously required joins can be performed from a single table. Of course, the service now has to deal with all the perils of denormalization such as data inconsistency.
+
+
+
+b. Referential integrity: As we saw that performing a cross-shard query on a partitioned database is not feasible, similarly trying to enforce data integrity constraints such as foreign keys in a sharded database can be extremely difficult.
+
+Most of RDBMS do not support foreign keys constraints across databases on different database servers. Which means that applications that require referential integrity on sharded databases often have to enforce it in application code. Often in such cases, applications have to run regular SQL jobs to clean up dangling references.
+
+c. Rebalancing: There could be many reasons we have to change our sharding scheme:
+
+The data distribution is not uniform, e.g., there are a lot of places for a particular ZIP code, that cannot fit into one database partition.
+There are a lot of load on a shard, e.g., there are too many requests being handled by the DB shard dedicated to user photos.
+In such cases, either we have to create more DB shards or have to rebalance existing shards, which means the partitioning scheme changed and all existing data moved to new locations. Doing this without incurring downtime is extremely difficult. Using a scheme like directory based partitioning does make rebalancing a more palatable experience at the cost of increasing the complexity of the system and creating a new single point of failure (i.e. the lookup service/database).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

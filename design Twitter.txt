@@ -1,0 +1,141 @@
+
+
+
+How to design Twitter? Interview question at Facebook, Google, Microsoft
+https://www.youtube.com/watch?v=KmAyPUv9gOY
+
+hiredintech.com: MORE DETAILED..
+https://www.hiredintech.com/classrooms/system-design/lesson/67
+
+
+
+1. Twitting
+2. Timeline - User timeline, home timeline(feeds from people you follow in chronolgical order)
+3. Following - U follow someone and there feeds start getting in your home timeline
+
+
+Database:
+Tweet - ID, content,userId(refernce User.Id)
+User - Id,Name
+1 to N relationship between tweet and user. A user can have multiple recors in tweet table
+
+How to show user home timeline.?
+query the tweet table for user whom he follows and get there tweet from tweet table in chronological order.
+
+
+Twitter is read heavy ..lot of read and less tweet
+
+High availability and eventual consistency..
+it dosen't matter if I see someone tweet 30 sec delayed but wil be a problem if I cannot access the network..
+
+
+
+
+Redis cluster: in memory db
+twitter uses it to precompute very user home time line who follow this user who has just twitter
+every hometime is replicated 3 places
+one way to optimize this to precomute home timline for user who has access tweter inlat few days. This means that those accessing twitter aftr a long time wil take time bcz it will take time to refresh their hoem time line..
+
+
+How does internal redis cluster look like
+each redis will have a list which correspond to a single user and this will be replicated in 3 redis machine.. oneof them will get updated faster but eventually all will
+
+how does that List look like
+User:Bob
+tweetID,sender..
+so if a user post something all its user list will get updated..this will be 3 times of total following..
+
+but this has a problem that what if lady gaga, justin bieber tweet somthing..this process will be time consuming bcz of number of followers.. in this casse we take mixed approach
+
+Mixed appraosach - inmememory +synchronization
+i.e bob timtline will get updated in redis and at load time all famous peoople(high  followers) feed will be merged..
+
+
+
+Following:
+Table for who following whom
+so when request goes to load balancer after U tweet, it fetches all followers ID from followers table, and,update their timeline in redis.
+
+
+
+Bob access his timeline -- GET /timline -- go to Load balancer -- it seaches in hash-lookup with bob user Id to find which 3 redis machine out of 100s has bob timeline -- it gets it from which among those 3 redis responds first and poulate bob timline..
+
+
+
+We can talk about how search works, that has independent flow from this. like sednign twets to redis it similarly sends it to it search platfor so that they can search tweet efficiently.
+Can talk about  targeted advertisment with all data analytics, they know preference, followers,etc
+How to incorporate push notifcation,etc..lots of people tweeting and follwoing how can push notificationbe made efficient.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

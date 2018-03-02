@@ -1,0 +1,79 @@
+
+
+System Design: Uber Lyft ride sharing service
+https://www.youtube.com/watch?v=J3DY3Te3A_A
+
+
+
+Functionality:
+1.Customer Driver matching -- This is by large is determined by how they compute ETA as discussed in next point.. by location, star points,etc
+2.Mapping for ETA -- how they solve graph proble like travelling salsman. They precompute best path using djisktra,A* and store it internally. How they do it by dividing the city into smaller parts and pre-computes best path beteen nodes in that region.Also for ETA they have two ways:
+1. historical data..what traffic used to be there in thosew region in past
+2. splitting the grpah/city and real time computing the ETA's combined by regions..
+
+
+Storage:
+Trip Storage -- stored at 2 data center..one close to user and other backup data cncter
+Data warehouse Hadoop -- for analytics on trip storage,etc
+
+Cachine layer : not very good inhere bcz of real time position of driver is not best way to store..position changes so quickly..instead we can use readic sna store it and send to user directly...
+
+Logging : logging everyting that happens is very critical to uber,etc to know the movement of the driver,etc.it can help in providing them better path,etc
+we store logs from driver app and cutomer app..but how do we store them in real time..so for that they use KAFKA(messahe injestion tool)...it takes logs from user,driver like locations,stop,etc..it will be send to cluster of kafka's and then kafka will send it to Warehouse hadoop..
+
+
+Service oriented arct (SOA):
+they depend hevaily on SOA for their design..they don;t have a big monolithic system but instead small sub system talking to each oter..
+
+
+Provision : App inot machine
+They have a repo which contains static code for different uber servies , which them with provisioing deployed to different running services... like some service in north amrica,europe,etc.. They use containers(shielded runtime environment like Docker) to push code to their services..
+Mesos is a tool they use to chek if different servoices are running correctly during runtime, it on/off servies to check its behaviour..
+
+Routing
+which backend the app should connect to.
+like they have multiple apps based on region,etc.which user should get connected to which app requires good routing.
+if state is present in user data,then the routing asd to be efficient enought to roiute to the same server..that's y we build stateless serviers.
+
+
+Resiliency testing: if some somthing fails..
+tool called hail storm..it ramdomly tunr few service offline(shadow freeze)..this hellps is testing if somthinf fails how system behaves..
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

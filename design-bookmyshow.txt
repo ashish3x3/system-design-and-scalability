@@ -1,0 +1,732 @@
+
+
+https://practice.geeksforgeeks.org/problems/design-bookmyshow
+https://www.geeksforgeeks.org/design-movie-ticket-booking-system-like-bookmyshow/
+
+Design architecture for bookmyshow.
+
+How to implement seat booking process? How to handle the cases where two persons are trying to access the same seat almost same time?  Write class based solution asking about different functions that should be used to solve all the cases for booking procedure.
+
+Note: While answering design pattern questions, it is expected from you to provide the Data Structure that would be best suited, different classes & relationships between them, etc. You need not provide the whole code in your answer (unless explicitly told to do so).
+
+Follow-up question -
+1) How do you handle issues like scalability, concurrency, fault-tolerance etc.
+2) Show movie theaters near to user where movie is playing and seats are available
+3) Design database. What kind of DB would you use SQL or No-SQL
+4) In real time how would you show which seats are booked which are free
+5) If theaters do not have any api for fetching information then what can we do about it..
+	Seats details are not stored with bookmyshow, once, they have showtime details, they will call custom apis provided by the theaters to get the seats current status.
+	If they don't have APIs, then, they have two solutions
+	one is that they manually call those theaters to book the tickets, other would be to save seats details in bookmyshow only and let those theaters book seats based upon bookmyshow page availability, (like, bookmyshow can provide admin page to those theaters to book windows tickets using admin page of bookmyshow only).
+
+2) When user selects city, movie list is displayed.
+3) When user selects movie, list of theatre is displayed.
+4) When user selects theatre, show timing is displayed.
+5) When show timing is selected, user is asked for no of seats that he wants to book
+6) When user selects no of seats, seats are displayed to choose from.
+7) When user selects seats, then total price is displayed.
+8) When total price is selected, then user is directed to payment gateway and payment is done and on payment success, ticket is mailed to him.
+
+More questions on how can we scale the system, and handle concurrent users request for same seat etc.
+
+
+1. clarify questions on load like req/sec in non peak and peak hours, single server capacity,etc
+2. Estimates traffic on server required,etc based on info from 1st step
+3. Design goals like CAP,what are we going for
+4. DB reqired..sql vs nosql..sharding(how to hash,consistent hashing,, what approach,master-slave/2 master -slave,),performance based on choice of DB
+5. API's Details  Book_My_Show(Customer cust_id, ShowTImeAndVenue show_id);
+				  payCharges (Customer Cust_Id, ShowTimeAndVenue show_id);
+				  Print printDetails (BookMyShow registration_no);
+				  class Transaction:
+				  void pay(int age, int num_of_seat, string place) { / / fee calculation logic acc to age of 		person and number of seat as well as place where it is demanded
+				  		payment_gateway( amount);}
+				  void refund( ) { // if_seat_cancelled fees refund with deductions cahres    }
+				  void confirmation( ) {  message.send.to_registerd_mail_ID;   }
+
+
+Design consideration:
+1. DataStructure similar to ConcurrentHashMap with n number of blocks, can be used to represent available seats, so that N users can concurrently book the ticket.
+2. Given X is the number of seats an user want to book, and YZ is the range of rows preferred, the system should try to book the seats in continuous order in same row, if not possible in any of the rows in the given range, it should try to maximize the number of seats in the row and minimize the span across the rows.
+
+
+*****************************
+To do any design question effectively, its better to clarify your idea with the interviewer. You have to tell interviewer that this is what i know about bookMyShow, is this the only thing expected or i have to inculcate any additional feature as well? Discuss with him , that i know the following points about bookMyShow:
+
+1. It is used to book movies online.
+
+2. We can select the city, cinema, seat no. and show time that suits us.
+
+3. If our account has sufficient money, then the ticket charges are deducted from our account after we fill the account information, and a message of confirmation is delivered to us. Otherwise, the seat is obviously not booked.
+
+4. Based on that confirmation message, our ticket gets printed at cinema hall.
+
+Interviewer might suggest you, if you are missing something. Let us proceed.
+
+Now, you have to ask him some questions to clarify the idea, like:
+
+1. How many number of movies can be there?
+
+2. Do we have to design the application for a particular city/ state/ city or worldwide? (Lets say for a country.)
+
+3. What amount of rate can a single server handle? (For simplicity, lets assume 1000/second).
+
+4. What is the average load(general cases) and the peak load(when movie if just released)? (Lets say 3,000 and 10,000 per second).
+
+5. Do the number of clients/ rate of requests increase with time? (Yes, at a rate of 1000 requests/year).
+
+Ok, so now we have gathered basic information. Let us move to the scalability, which is one of the most important things to take care of.
+
+In average case we have 3000 requests/second, and a single server can handle 1000/second. So 3 servers are a bare minimum that we need. Similarly 10 servers are bare minimum in case of peak load. For better performance and things like replication, we will need to deploy more servers. (Lets say 5 in average case and 14 in peak cases).
+
+One of the possible solutions is that we can purchase 5-6 servers to efficiently handle average case, and host the application on cloud (Microsoft Azure/ Amazon AWS) in peak cases, and pay to them based on pay as you go model.
+
+Second option that we have is that we can purchase our own 15-20 servers to efficiently handle peak cases.
+
+Now let us proceed to design goals. Design goals are the factors like latency, consistency and availability. Which of the goals is most important to us in this case?
+
+Latency - The minimum it is, the better, so we must try to minimize latency as much as possible.
+
+According to CAP theorem, if we make system partition tolerant, then we can achieve either one of two - Consistency and Availaility.
+
+Consistency - It is an utmost priority as it might lead to problems when the data goes inconsistent (Two persons book the same seat in same auditorium).
+
+Availability - The more the availability of the system, the better, but consistency is more important to us. So we will have to manage with eventual availability.
+
+Let us proceed to the type of database that we need.
+
+We have to choose between relational and NoSQL databases, we will choose based on:
+
+1. Relations in our problem :  There are many relations in our problem, like :
+
+State -> City.
+
+City -> Cinema
+
+Cinema -> Auditorium.
+
+Auditorium -> Seat No.
+
+So as there are many relations, relational databases is a better choice based upon this factor. So 1 vote for relational databases.
+
+2. Sharding : Do we need to shard our database? Or a single system is good enough ? Well, lets assume for an instance we will fit all the data in a single server, if need be, we will do vertical scaling by increasing system's RAM, and hard disk. But eventually, it will cause a problem as number of requests increase at a rate of 1000/year. So eventually we will have to split the database. Even if we use the a single server, It will lead to slow down the things as there is only 1 server to grant requests. So we need to shard our database. So here is a +1 for NoSQL Databases, as horizontal scaling is better for NoSQL databases and they shard really well.
+
+3. Performance: To minimise the latency, we should use NoSQL databases as relational databases are packed with many constraints and follow ACID properties, which ultimately make them slow. So another +1 for NoSQL databases.
+
+So for now, let us proceed with NoSQL Databases.
+
+We will do sharding.
+
+1.We can follow master slave approach of sharding with 1 master and many slaves, such that all the requests to store the data are granted by masters and stored in slaves.
+
+Problem with this approach: Single point of failure. Even if a slave replaces the master, it will take sometime for which the system will not be available.
+
+2. 2 Masters many slaves approach : This approach seems to fit, even if 1 master fails, other masters will still be available.
+
+Now how will we store data on systems?
+
+When we use sharding, its generally preferred to store data in key-value form. So we will use hashing to solve the purpose.
+
+One what bases do we hash?
+
+1. Suppose 1 server can store 2000 entries. We can store 1-1000 entries in 1st server, 2001-4000 entries in 2nd server and so on.
+
+Problem: Load is not divided. When a new movie is released, suppose 2000 persons book the ticket, and it is stored in same server. While 1 server receives a load of 2000 people, other servers are idle.
+
+2. We can hash the values to different servers based on id. If we have 10 servers, we can hash values to different servers using function registration_id%10.
+
+Problem: What if we need to deploy more servers? Will we change hash function to reg_id % 11? In that case, what about the entries that you have previously inserted into the function using %10, how you will access it?
+
+A better solution: Use consistent hashing.
+
+Now we must focus on the APIs that we are supposed to make.
+
+1. One of the APIs should be to book the show:
+
+Details Book_My_Show(Customer cust_id, ShowTImeAndVenue show_id);
+
+A Details class object will be returned which will act as a confirmation when you go and get the ticket printed in cinema hall.
+
+2. payCharges (Customer Cust_Id, ShowTimeAndVenue show_id);
+
+if your account holds sufficient amount, your show will be booked and the charges will be deducted from your account.
+
+3. Print printDetails (BookMyShow registration_no);
+
+This API is useful for cinema guys to print the ticket.
+
+
+
+Lets take two classes SeatBook and Transactions both of which are called from the main class named BookMyShow
+
+  In SeatBook class i will have reference to  Transaction class, lets start
+
+To ensure  where two persons are trying to access the same seat almost same time i would use Synchronized method
+
+ of Thread class and would call a thread belong to each log in user.
+
+Class SeatBook
+
+{
+
+  Transaction transaction_obj;
+
+  bool arr[total_num_of_seat];
+
+string place;
+
+  int age_of_person;   //ticket price may very for kids
+
+
+
+
+
+   bool check_availability()
+
+  int position_of_seat()
+
+{  return seat_pos_in_theator;   // front ,back,middle}
+
+
+
+  void multiple tickets( );
+
+  void final_booking( )
+
+{
+
+     place = positon_of_seat( );
+
+             if(single_ticket)
+
+        continue;
+
+            else
+
+         mutliple_ticket_booking( );
+
+           Transaction_obj.pay( age, num_of_seat_to_book,place);
+
+ }
+
+
+
+  class Transaction
+
+ {
+
+       void pay(int age, int num_of_seat, string place)
+
+    {
+
+           / / fee calculation logic acc to age of person and number of seat as well as place where it is demanded
+
+          payment_gateway( amount);
+
+   }
+
+      void refund( ) { // if_seat_cancelled fees refund with deductions cahres    }
+
+      void confirmation( ) {  message.send.to_registerd_mail_ID;   }
+
+}
+
+
+
+
+
+
+1. DataStructure similar to ConcurrentHashMap with n number of blocks, can be used to represent available seats, so that N users can concurrently book the ticket.
+2. Given X is the number of seats an user want to book, and YZ is the range of rows preferred, the system should try to book the seats in continuous order in same row, if not possible in any of the rows in the given range, it should try to maximize the number of seats in the row and minimize the span across the rows.
+
+
+
+struct tickets{
+        int gold;
+        int solver;
+        int normal;
+};
+struct movie{
+        char starcast[100];
+        int duration;
+        struct tickets *barfiT;
+};
+struct theater{
+        struct movie *barfi;
+        struct movie *humtum;
+};
+struct city{
+        struct theater *theater1;
+        struct theater *theater2;
+};
+struct state{
+        struct city *rohini;
+        struct city *dwarka;
+};
+struct country{
+        struct state *delhi;
+        struct state *mp;
+};
+struct countries {
+        struct country *india;
+        struct country *china;
+};
+
+
+
+
+
+*************************** ********************************
+
+The Main Classes to be used for the user personas :
+
+User
+Movie
+Theater
+Booking
+Address
+Facilities
+
+Enums :
+
+    public enum SeatStatus {
+    SEAT_BOOKED,
+    SEAT_NOT_BOOKED;
+}
+
+public enum MovieStatus {
+    Movie_Available,
+    Movie_NotAvailable;
+}
+
+public enum MovieType {
+    ENGLISH,
+    HINDI;
+}
+
+public enum SeatType {
+    NORMAL,
+    EXECUTIVE,
+    PREMIUM,
+    VIP;
+}
+
+public enum PaymentStatus {
+    PAID,
+    UNPAID;
+}
+
+class User {
+
+    int userId;
+    String name;
+    Date dateOfBirth;
+    String mobNo;
+    String emailId;
+    String sex;
+}
+
+class Movie {
+
+    int movieId;
+    int theaterId;
+    MovieType movieType;
+    MovieStatus movieStatus;
+}
+
+class Theater {
+
+    int theaterId;
+    String theaterName;
+    Adress adress;
+
+    List<Movie> movies;
+    float rating;
+}
+
+class Booking {
+    int bookingId;
+    int userId;
+    int movieId;
+    List<Movie> bookedSeats;
+    int amount;
+    PaymentStatus status_of_payment;
+    Date booked_date;
+    Time movie_timing;
+}
+
+class Address {
+
+    String city;
+    String pinCode;
+    String state;
+    String streetNo;
+    String landmark;
+}
+This is an OOP design question, so full code is not required. The above code has classes and attributes only. In the above code, as you can see enums are self-explanatory.
+We have users class in which users details are kept.
+Theater class in which name of the theater, it’s address and list of movies currently running are kept.
+Booking class lets you book the seat in a particular theater. It keeps a reference in Movie, Payment class.
+
+How to handle the cases where two persons are trying to access the same seat almost same time?
+
+Lets take SeatBook and Transactions class which will be called from the main class. Here from the above code, We expand a bit the payment process which is not shown in the above code. In SeatBook class we will have reference to Transaction class also.
+
+Now to ensure when two persons are trying to access the same seat almost at the same time then we would use Synchronized method of Thread class and will call a thread belong to each log in user.
+
+Class SeatBook
+{
+    Transaction transaction_obj;
+    bool seats[total_seats];
+    String place;
+    String ticketType;
+
+    bool check_availability();
+
+    int  position_of_seat()
+    {
+        return seat_pos_in_theator;
+    }
+
+    void multiple tickets();
+
+    void final_booking()
+    {
+        place = positon_of_seat();
+        if (single_ticket)
+            continue;
+        else
+            mutliple_ticket_booking();
+
+        Transaction_obj.pay(ticketType, seats_booked, place);
+    }
+}
+
+
+
+
+*************************************************
+
+https://www.quora.com/How-can-I-design-on-BookMyShow
+http://www.socialgameville.com/2017/05/designing-online-movie-ticket-booking.html
+http://www.socialgameville.com/2017/05/designing-online-movie-ticket-booking-2.html
+
+Primary use cases/features of your product
+
+ For an online movie ticket booking service I am assuming the features below
+
+The portal could list down different cities where it’s affiliate theatres are running. Once the user selects the city it should display the movies released in that particular city.
+Once the user selects the movie the portal should display the theatres running that movie.
+The User should be able to select the show at a particular theatre & book his tickets in the portal.
+The portal should send real time notifications to the user about new movie releases & other stuff.
+
+
+Estimated traffic for your service to run up against
+
+Stats: BookMyShow has 3 billion+ page views per month & sells 10 million+ tickets a month.
+Well that’s quite a good amount of traffic. Your application must be pretty fast to display all the details about the movies.
+During a popular much awaited movie release the traffic would spike up. The seats fill up pretty fast in no time. The system should be scalable, highly available to cope up with the traffic surge.
+
+
+
+Primary design goals
+
+The system should be highly concurrent. There will be multiple booking requests for the same seat at any particular point of time.
+The core thing of the portal is ticket bookings which means financial transactions. Which means the system should be secure & the database ACID compliant.
+The user interface should have a responsive design to run on devices of various sizes like mobile, tablet, desktop etc.
+Keep read only data in cache. Avert db hits as much as you can. Cache the hell out.
+Implement a distributed message queue to provide push notifications to the user.
+Take the state out of the individual server nodes to a common in memory database. For an instance port out user sessions from individual tomcat server nodes to a memory common to all the server nodes. This approach makes horizontal scaling of your architecture easier.
+
+
+
+Database SQL or NoSQL
+
+When you think of the database you have two choices SQL or NoSQL.
+I am assuming you would have an idea about the features, vices & virtues of both the database types.
+If not here are some good links.
+https://www.thoughtworks.com/insights/blog/nosql-databases-overview
+http://www.sitepoint.com/sql-vs-nosql-differences/
+http://www.sitepoint.com/sql-vs-nosql-choose/
+https://engineering.pinterest.com/blog/learn-stop-using-shiny-new-things-and-love-mysql
+
+Let’s do a quick analysis of the primary requirements.
+Transaction handling
+This is what SQL does best. Remember the ACID rule. The majority of the NoSQL DB's do relax the ACID constraints for achieving horizontal scalability.
+Good read https://en.wikipedia.org/wiki/Eventual_consistency
+
+What do we need to store?
+
+We have to store cities running the shows.
+Newly released movie details.
+Theaters running in respective cities & their details.
+Shows running in the theaters. Show details like date & time.
+User information.
+User’s booking information.
+
+The data clearly has relations. Cities are related to movies & theaters. Movies are related to theaters. Theaters are related to shows.
+SQL clearly wins when you have to store relational data. NoSQL stores are inefficient with maintaining relations.
+
+Data size
+The system is read heavy. The majority of the data is read-only. There are less writes in the system.  The DB size won’t grow exponentially like as that of a social network.
+We will scale well with MySQL.
+
+Here is a basic DB schema for the app
+
+PK: Primary Key
+FK: Foreign Key
+
+Tables
+
+MOVIE
+Cols> movie_id(PK), movie_name, movie_description, city_id(FK).
+CITY
+Cols> city_id(PK), city_name, show_id(FK)
+SHOW
+Cols> show_id(PK), theatre_id(FK), movie_id(FK), show_date, show_timings
+THEATRE
+Cols> theatre_id(PK), city_id(FK), movie_id(FK), movie_release_date, theatre_name, theatre_address
+USER
+Cols> user_id(PK), user_name, user_details, booking_id(FK)
+BOOKING
+Cols> booking_id(PK), user_id(FK), booking_date, show_id(FK)
+SEAT
+Cols> seat_id(PK), show_id(FK), seat_status(Booked/Available), booking_id(FK), theatre_id(FK)
+
+You can further tweak it as you progress with the app development.
+Since we are using an ORM we will have the same Java classes as tables.
+
+APPLICATION FLOW
+STEP 1: The User is prompted to select the city on the home page of the portal. User selects the city.
+Many movies can be released in a city so the CITY table has a one to many relationship with the MOVIE table.
+After the user selects the city, the portal runs a query on the MOVIE table “select all movies where the city is x” & lists out all the movie rows corresponding to that city id.
+
+STEP 2: User selects the movie.
+Many theaters can run the same movie. So the MOVIE & THEATRE tables are in a one to many relationship.
+The portal runs a query on the THEATRE table “select all records where movie is x & city is y” to find the theaters running a particular movie in the city.
+
+Step 3: User selects the theatre
+A query is run on the SHOW table “select all shows where theatre id is x & movie id is y” which lists out all the details of the shows running in a particular theatre.
+
+Step 4: User selects the show
+The portal runs a query on the SEAT table “select all seats where show_id is x”. The result lists out all the seats with the availability status.
+
+Step 5: User selects the seats & clicks on the book seats button
+A booking object is created with all the details & the system runs a db query adding a new row in the BOOKING table & updating the SEAT table. One booking record id to many seat records
+BOOKING table & the SEAT table have a one to many relationship.
+There are scenarios where the tables can have many to many relationships for an instance A movie can be released in multiple cities & at the same time multiple movies can be released
+in a particular city. For that we require another bridge table. Just to keep things simple, I’ve just created one to many relationship as per the usage scenario.
+
+MOVING ON TO THE TECHNOLOGY STACK
+Below is the technology stack I would use to write the app.
+
+UI: ReactJS & BootStrapJS
+Server: Java, Spring Boot, Swagger, Hibernate
+Security: Spring Security
+Database: MySQL
+Server: Tomcat
+Caching: In memory cache Hazelcast.
+Notifications: RabbitMQ. A Distributed message queue for push notifications.
+Payment API: Popular ones are Paypal, Stripe, Square
+Deployment: Docker & Ansible
+Code repository: Git
+Logging: Log4J
+Log Management: Logstash, ELK Stack
+Load balancer: Nginx
+
+
+
+************************ **********************************
+
+https://www.careercup.com/question?id=6193420734300160
+
+
+2) When user selects city, movie list is displayed.
+3) When user selects movie, list of theatre is displayed.
+4) When user selects theatre, show timing is displayed.
+5) When show timing is selected, user is asked for no of seats that he wants to book
+6) When user selects no of seats, seats are displayed to choose from.
+7) When user selects seats, then total price is displayed.
+8) When total price is selected, then user is directed to payment gateway and payment is done and on payment success, ticket is mailed to him.
+
+More questions on how can we scale the system, and handle concurrent users request for same seat etc.
+
+
+
+Basic design is to let database handle everything
+You can design the backend in following ways
+
+
+API -> GetListOfCities()
+- will go to DB and fetch list of cities into City Class
+
+
+API -> GetListOfEventsByCity(CityId)
+- when user select city, this API will return a list of events in Event Class, which can be extended into multiple types of events such as movies, shows, or festivals etc.
+
+API -> GetLocationsByCity(CityId)
+- This api will return list of locations(theaters, event grounds etc) based upon the city chosen by the user.
+
+API -> GetLocationsByEventandCity(cityid, eventid)
+- when user select event, we know the eventid and we already know the cityid, we can make this API call to get locations where the event is getting played/organized.
+
+API -> GetEventsByLocationandCity(CityId, LocationId)
+- this API will return list of events given the locationid and the city id, we are using cityid here to not create different locationid for same theaters in multiple cities.
+
+API -> GetShowTiming(eventid,locationid)
+- when user select the location, we know the locationid, system will call this API to get the available show timings
+
+API - > GetAvailableSeats(eventid,locationid,showtimeid)
+- user will select the showtime, and UI will let user select number of seats in next page, we call this API when user has selected the seat count, until this point everything was read-only, so no issue with concurrent calls, but from this point, we have the concurrency issue. this API will only show currently available seats, which can change in future, once the user has selected the seats, we will call this new API
+
+API -> VarifyUserSelectedSeatsAvailable(eventid,locationid,showtimeid,seats)
+- this will tell us whether all the chosen seats are available or not, if not, we call GetAvailableSeats again for new available seats.
+Once VarifyUserSelectedSeatsAvailable passes, we will block those seats for the user, and move the call to the payment gateway. if payment is failed for whatever reason, we will let the user do one more try, and then unblock those seats if not successful.
+
+
+
+City Table
+{
+    CityId
+    Name
+    Other properties if needed
+}
+
+Event Table
+{
+    EventId
+    Event Name
+    Other properties if needed
+}
+
+Location Table
+{
+     LocationId
+     Location Name // like theater name
+     Other properties if needed
+}
+
+ShowTime Table
+{
+     ShowTimeId
+     ShowTime other details
+}
+
+CityEventLocation Table
+{
+     CityEventLocationID
+     CityId
+     LocationId
+     EventId
+     Custom Properties if needed
+}
+
+EventShowTime Table
+{
+     EventShowId
+     CityEventLocationID
+     ShowTimeId
+     Custom Details specific to show times of the cityeventlocationid
+}
+
+
+
+Seats details are not stored with bookmyshow, once, they have showtime details, they will call custom apis provided by the theaters to get the seats current status.
+If they don't have APIs, then, they have two solutions
+one is that they manually call those theaters to book the tickets, other would be to save seats details in bookmyshow only and let those theaters book seats based upon bookmyshow page availability, (like, bookmyshow can provide admin page to those theaters to book windows tickets using admin page of bookmyshow only).
+
+
+
+
+
+
+
+
+findAll(cities)
+
+findAll(movies)
+
+findMoviesByCity(selected_city)
+
+findTheatersByMovie(selected_movie, selected_city)
+
+findShowtimeByTheater(selected_theater, selected_movie, selected_city)
+
+findAvailableSeats(selected_time,selected_theater, selected_movie, selected_city)
+
+showPrice(selected_seat, selected_time,selected_theater, selected_movie, selected_city)
+
+applyLockOnSeats(selected_seats,selected_showtime,selected_theater,selected_movie, selected_city, timestamp)
+
+payForTickets(price, credit_card_details)
+
+releaseLockOnSeats(selected_seats,selected_showtime,selected_theater,selected_movie, selected_city, timestamp)
+
+bookTickets(user_info, selected_seat, selected_time,selected_theater, selected_movie, selected_city, payment_successful_flag)
+
+Regarding concurrent requests, we would need to block the tickets for x min while user is selecting the tickets. This will make sure that there is no double booking. This blocking will only happen when user selects the seats.
+
+The finder method calls will give state at the moment when request was invoked with a disclaimer that the state may change and actual state will be displayed at the time of seat booking.
+
+Regarding scalability, the system can be scaled to any number and we can ask qualifying question as what interviewer expects to happen on scalability, whether its regarding supporting multiple vendors or multiple end users. Since our system is micro-service driven each service can work independently and stateless
+
+
+Regarding concurrent booking, we can run applyLockOnSeats and payForTickets in single transaction and put a lock on seats for x duration
+
+
+
+
+
+**************************************
+
+Design Online movie ticket system. How can you make this website faster. What would would you cache?
+
+
+I try to make the design as simple as possible. I assumed:
+1. we don't care about who has which seat, we just care about the available seats.
+2. There is no need to write the part that handles user chooses a seat or user pays for the seat.
+
+
+class Seat{
+	int row;
+	int col;
+	//setters,getters
+}
+
+/*General info about theatre*/
+class Theatre{
+	HashSet<Seat> availableSeats;
+	String theatreName;
+	String theatreAddress;
+	//other theatre info + setters,getters
+}
+
+
+/*general info about the movie*/
+class MovieInfo{
+	String name;
+	String description;
+	List<String> actors;
+	//other info + setters,getters
+}
+
+
+/*a class that handles ticket management for a specific movie in a specific theatre for a show time*/
+class MovieTicket{
+	Theatre theatre;
+	Date showTime;
+	MovieInfo movieInfo;
+
+	HashSet<Seat> getAvailableSeats(){
+		return theatre.getAvailableSeats();
+	}
+
+	boolean synchronized commitToBuy(Seat seat){
+		 if(theatre.getAvailableSeats().contains(seat)){
+			theatre.getAvailableSeats().remove(seat)
+			return true;
+		}
+	return false;
+	}
+}
+To make it faster, one possible way is to put MovieTicket object in an LRU cache to make sure that hot movies (like a newly released movie at the weekend) can be retrieved very fast. If the MovieTicket object doesn't exist in the cache, we have to create one from our DB.
+

@@ -1,0 +1,593 @@
+9
+
+1000	kB	kilobyte
+1000^2	MB	megabyte
+1000^3	GB	gigabyte
+1000^4	TB	terabyte
+1000^5	PB	petabyte
+1000^6	EB	exabyte
+1000^7	ZB	zettabyte
+1000^8	YB	yottabyte
+Binary
+Value	IEC	JEDEC
+1024 bytes	KiB	kibibyte	KB	kilobyte
+1024^2	MiB	mebibyte	MB	megabyte
+1024^3	GiB	gibibyte	GB	gigabyte
+1024^4	TiB	tebibyte	–
+1024^5	PiB	pebibyte	–
+1024^6	EiB	exbibyte	–
+1024^7	ZiB	zebibyte	–
+1024^8	YiB	yobibyte
+
+1 byte = 8 bits
+1 kilobyte (K / Kb) = 2^10 bytes = 1,024 bytes
+1 megabyte (M / MB) = 2^20 bytes = 1,048,576 bytes
+1 gigabyte (G / GB) = 2^30 bytes = 1,073,741,824 bytes
+1 terabyte (T / TB) = 2^40 bytes = 1,099,511,627,776 bytes
+1 petabyte (P / PB) = 2^50 bytes = 1,125,899,906,842,624 bytes
+1 exabyte (E / EB) = 2^60 bytes = 1,152,921,504,606,846,976 bytes
+
+Megabyte or MB. One megabyte is about 1 million bytes (or about 1000 kilobytes
+1 MB = 1000000 bytes (= 1000^2 B = 10^6 B = 10^3 KB)
+1 GB = 10^6 KB (in decimal) / 1,048,576 KB (in binary)
+1 TB = 10^9 KB
+1 PB = 10^12 KB = 10^15 bits
+1 Million =  10^6 KB
+1 Billion = 10^9 KB
+
+1 GB = 2^20 KB in base 2.
+1 Gigabyte = 10^9 bytes / 2^30 bytes
+1 Megabyte = 2^20 bytes
+
+https://gamedev.stackexchange.com/questions/53918/how-much-lines-of-code-is-1kb
+1 kB = 1024 Bytes.
+
+Most of programming languages have 1 Byte = 1 character, so:
+
+If your lines are 1 character long, 1 kB = 1024 lines
+If your lines are 1024 characters long, 1 kB = 1 line
+If your lines are 25 characters long, 1 kB = about 40 lines
+
+1000 Bytes is 1 KB (kilobyte) and 1024 Bytes is 1 KiB (kibibyte = kilobinary-byte).
+Both 8.589.934.592 bits and 8.000.000.000 bits are given in answers, and 8.000.000.000 bits is the correct answer to the question.
+However, had the question instead been "How many bits are there in 1 GiB of RAM?" the correct would have been 8.589.934.592 bits.
+So to be strictly correct it is important to distinguish between kilo and kibi, mega and mebi, giga and gibi and so on.
+
+I mentioned that Microsoft don't get it right in Windows. You might even have experienced the issue and wondered why things didn't seem right. 
+Ever bought a 500 GB hard drive, put it in the PC, booted up Windows and it reported a 466 GB hard drive?
+In this case the hard drive manufacturer has correctly marketed the drive as a 500 GB drive with 1 GB meaning 1.000.000.000 bytes. 
+However Windows thinks that 1 GB (1000^3) is 1.073.741.824 bytes (1024^3) and thus says that the drive is 466 GB which is not correct.
+
+It would be correct to say that the drive is 466 GiB or 500 GB - not 500 GiB nor 466 GB.
+
+https://superuser.com/questions/351791/what-is-a-general-rule-of-thumb-for-file-sizes-in-kb-mb-gb-etc
+For text files, it depends on the encoding. If you use ASCII, then it will be 1 byte/char. If you use UTF-8, then it will depend on the particular characters, varying from 1 to 4 bytes/char. But this mainly applies to East Asian languages with lots of characters. If you convert an ASCII (only Latin alphabet) file to UTF-8, the difference in file size should be minimal.
+
+2^10 bytes = KB
+2^20 = MB
+2^30 = GB = 8 * 2^30 bits
+2^40 = TB
+2^50 = PB ==> 8 * 2^50 bits
+
+1GB RAM has 8*2^30 = 8,589,934,592 bits
+
+BITS AND BYTES SIZES
+8 bits are equal to 1 byte (one or two words)
+1,024 KB are equal to 1 MB
+1,024 MB are equal to 1 GB
+1,024 GB are equal to 1 TB
+1,024 TB are equal to 1 PB
+1,024 PB are equal to 1 EB
+http://www.sdsdiscovery.com/resources/data-conversions/
+1 GB = a truck full of pages
+1 PB = 250 Billion Pages of Text)
+1 petabyte is one quadrillion (short scale) bytes
+
+
+here KB/kb alll same..Kilobyte/KilaByte
+1.27 KB  * 10 million ==> 1.27 KB * 10*10^6 KB ==>12.7 * 10^6 KB ==> 12.7 GB
+
+10 KB * 500 * 10^3 * 30 ==> 150* 10^6 KB=>150 GB
+10 KB * 500 * 10^6 * 30 ==> 150 * 10^9  ==> 150 TB
+10 KB * 5000000 * 30 ==> 1.5 TB
+10 KB * 50000000 * 30 ==> 15TB
+
+10 KB per tweet * 500 million tweets per day * 30 days per month
+	10 KB * 500 * 10^6 KB * 30 ==> 15 * 10^7 ==> 150 * 10^9 KB ==>150 TB
+10 KB  * 500 tweets per day * 30
+	15 * 10^4 ==> 150 * 10^3 => 150 MB  (1 MB = 10^3 KB)
+
+
+
+Million 1,000,000 (6 zeros)
+Billion 1,000,000,000 (9 zeros)
+Trillion 1,000,000,000,000 (12 zeros)
+Quadrillion 1,000,000,000,000,000 (15 zeros)
+
+2.5 million seconds per month
+1 request per second = 2.5 million requests per month
+40 requests per second = 100 million requests per month
+400 requests per second = 1 billion requests per month
+500 KB per page * 4 billion links crawled per month = 2 PB
+
+Reading 1 MB sequentially from memory takes about 250 microseconds, while reading from SSD takes 4x and from disk takes 80x longer.
+
+1 ns = 10^-9 seconds
+1 us = 10^-6 seconds = 1,000 ns
+1 ms = 10^-3 seconds = 1,000 us = 1,000,000 ns
+1 Microseconds = 1.0×10-6 Seconds
+
+Handy conversion guide:
+
+2.5 million seconds per month
+1 request per second = 2.5 million requests per month
+40 requests per second = 100 million requests per month
+400 requests per second = 1 billion requests per month
+
+1 sec =  1000 milisec
+
+2^31 = Ox 7FFFFFFF
+
+N bit system will rep 2^n-1 to 2^n-1 -1
+
+What is the maximum number of bytes for a UTF-8 encoded character?
+https://stackoverflow.com/questions/9533258/what-is-the-maximum-number-of-bytes-for-a-utf-8-encoded-character
+Characters with a code less than 128(all ascii char, emglish char,etc) will require 1 byte only, and the next 1920 character codes require 2 bytes only
+
+
+Given that each bit is capable of holding two possible values, the number of possible different combinations
+of values that can be stored in n bits is 2^n
+. For example
+
+8 bits can hold 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2 = 2^8
+ = 256 possible values 
+
+
+Text(40) consumes 40 bytes. 
+A whole number from –128 to +127. 
+
+8 bytes = 64 bits: 
+Really massive whole numbers (in the range of + or – 9 quintillion). 
+**************** ********************* **************************
+
+system-design-primer
+https://github.com/donnemartin/system-design-primer
+https://pastebin.com/SdSqvfkM
+https://www.educative.io/collection/page/5668639101419520/5649050225344512/5653164804014080/preview
+https://github.com/checkcheckzz/system-design-interview
+
+Crack the System Design Interview
+http://massivetechinterview.blogspot.in/search/label/Interview-System%20Design
+http://massivetechinterview.blogspot.in/2016/08/system-design-misc-part-3.html
+Crack the System Design Interview
+http://www.puncsky.com/blog/2016/02/14/crack-the-system-design-interview/
+https://github.com/shashank88/system_design
+
+
+****** How to Review Software Design
+http://massivetechinterview.blogspot.in/2017/06/how-to-review-software-design.html
+
+System Desing Videos
+http://massivetechinterview.blogspot.in/p/video-system-desgin.html
+
+******Cardinality Estimation: estimating unique users
+http://massivetechinterview.blogspot.in/2017/04/cardinality-estimation.html
+
+How to make software design decisions
+http://massivetechinterview.blogspot.in/2017/04/how-to-make-software-design-decisions.html
+
+To big site for almost everything in CS fundamentals, networking, too many design, and OOD question..
+http://massivetechinterview.blogspot.in/
+
+Design Mini Cassandra - LintCode
+http://massivetechinterview.blogspot.in/2017/07/mini-cassandra-lintcode.html
+
+system_design
+https://github.com/donnemartin/system-design-primer/tree/master/solutions/system_design
+
+Stories about Scalability
+http://massivetechinterview.blogspot.in/2017/04/stories-about-scalability.html
+
+object_oriented_design
+https://github.com/donnemartin/system-design-primer/tree/master/solutions/object_oriented_design
+
+OO Design Interview - How
+http://massivetechinterview.blogspot.in/2015/07/oo-design-interview-how.html
+
+System Design - Cache
+http://massivetechinterview.blogspot.in/2017/04/system-design-cache.html
+
+Design the Facebook news seed function
+http://massivetechinterview.blogspot.in/2014/12/design-facebook-news-seed-function.html
+
+Django web apps creation
+http://agiliq.com/books/djenofdjango/chapter1.html
+
+Redis Misc
+http://massivetechinterview.blogspot.in/2017/04/redis-misc.html
+
+Distributed Misc
+http://massivetechinterview.blogspot.in/2017/07/distributed-misc.html
+
+Design BookMyShow
+http://practice.geeksforgeeks.org/problems/design-bookmyshow
+
+Please implement a timed task scheduler, there are many tasks, each task has a timestamp, the task will start at that point in time.
+
+
+Design a geographically partitioned multi-player card game
+http://practice.geeksforgeeks.org/problems/design-a-geographically-partitioned-multi-player-card-game
+
+
+Design Elevator
+http://practice.geeksforgeeks.org/problems/design-elevator
+
+Design database for e-commerce
+http://practice.geeksforgeeks.org/problems/design-database-for-e-commerce
+
+
+Design a chat server 
+http://massivetechinterview.blogspot.in/2015/07/design-chat-server-hello-world.html
+
+
+How to design netflix
+http://massivetechinterview.blogspot.in/2015/09/how-to-design-netflix.html
+
+
+Principles of Software Architecture
+http://massivetechinterview.blogspot.in/2017/08/principles-of-software-architecture.html
+
+
+Cassandra Misc
+http://massivetechinterview.blogspot.in/2017/01/cassandra-misc.html
+http://massivetechinterview.blogspot.in/2017/08/cassandra-part-2.html
+
+Algorithms in a Nutshell
+http://massivetechinterview.blogspot.in/2016/02/algorithms-in-nutshell.html
+
+
+The Uber software architecture
+http://massivetechinterview.blogspot.in/2015/09/the-uber-software-architecture.html
+
+Speed Up Webpage for Slow Connection
+http://massivetechinterview.blogspot.in/2015/07/design-speed-up-webpage-for-slow.html
+
+
+Object oriented design for a Restaurant
+http://massivetechinterview.blogspot.in/2015/07/thought-works-object-oriented-design_74.html
+
+
+Object Oriented design for a cloud based file storage system like SkyDrive
+http://massivetechinterview.blogspot.in/2015/07/thought-works-object-oriented-design_21.html
+
+Distributed hash table 
+http://massivetechinterview.blogspot.in/2015/07/design-distributed-hash-table.html
+
+Memcached - Product Design
+http://massivetechinterview.blogspot.in/2015/07/memcached-product-design.html
+
+
+Design a Call Center
+http://massivetechinterview.blogspot.in/2015/07/the-fake-geeks-blog-design-call-center.html
+
+Design Hotel Reservation
+http://massivetechinterview.blogspot.in/2015/07/the-fake-geeks-blog-design-hotel.html
+
+Back-of-the-envelope Estimate
+http://massivetechinterview.blogspot.in/2015/07/numbers-every-programmer-should-know.html
+
+
+Big Data Storage
+http://massivetechinterview.blogspot.in/2015/07/design-big-data-storage-shuatiblogcom.html
+
+
+System Design: Lesson Learned
+http://massivetechinterview.blogspot.in/p/system-desgin.html
+
+
+
+Design Post System
+http://massivetechinterview.blogspot.in/2017/04/design-post-system.html
+
+
+HTTP API Design Guide
+http://massivetechinterview.blogspot.in/2016/01/http-api-design-guide.html
+
+
+
+
+Database Review Misc
+http://massivetechinterview.blogspot.in/2017/08/database-review-misc.html
+
+
+
+Java Scheduler
+http://massivetechinterview.blogspot.in/2017/04/java-scheduler.html
+
+
+-- Company Airbnb Tech
+http://massivetechinterview.blogspot.in/2017/07/company-airbnb.html
+
+
+
+How Good an Estimator Are You?
+http://massivetechinterview.blogspot.in/2016/06/how-good-estimator-are-you.html
+
+
+Buttercola: Fast ID Generator
+http://massivetechinterview.blogspot.in/2016/06/buttercola-fast-id-generator.html
+
+
+LeetCode Database
+http://massivetechinterview.blogspot.in/2016/06/leetcode-database.html
+
+Multi-Thread Practices
+http://massivetechinterview.blogspot.in/search/label/Coding%20-%20Review
+
+
+Design Pattern
+http://massivetechinterview.blogspot.in/search/label/Design%20Patterns
+
+
+
+Redis Architecture
+http://massivetechinterview.blogspot.in/search/label/Product%20Architecture
+
+
+Design Pastebin
+http://massivetechinterview.blogspot.in/search/label/Cracking%20Code%20Interview
+
+
+A Distributed Cache Design Based on "Sentinel"
+http://massivetechinterview.blogspot.in/search/label/System%20Design%20-%20Practice
+
+
+Design A Typeahead
+http://massivetechinterview.blogspot.in/2015/12/design-typeahead.html
+
+
+Algorithms
+http://massivetechinterview.blogspot.in/search/label/Algorithm
+
+
+
+
+The Architecture of Open Source Applications (Volume 2): Scalable Web Architecture and Distributed Systems
+http://massivetechinterview.blogspot.in/2015/06/the-architecture-of-open-source.html
+
+
+Design data structures for an online book reader system ~ KodeKnight
+http://massivetechinterview.blogspot.in/2015/07/design-data-structures-for-online-book.html
+
+Brag Your Way to Job Interview Success
+http://massivetechinterview.blogspot.in/search/label/How%20to%20Ace%20Interview
+
+
+Design Hit Counter - how to count number of requests in last second, minute and hour - Stack Overflow
+http://massivetechinterview.blogspot.in/2015/06/algorithm-how-to-count-number-of.html
+
+
+Design a Parking Lot - Shuatiblog.com
+http://massivetechinterview.blogspot.in/2015/07/cc150v5-84-design-parking-lot.html
+
+
+
+Object Oriented design for Elevator in a multi-storied apartment
+http://massivetechinterview.blogspot.in/2015/07/thought-works-object-oriented-design.html
+
+
+
+Print even and odd numbers using threads in java - Java-fries
+http://massivetechinterview.blogspot.in/2015/07/print-even-and-odd-numbers-using.html
+
+
+The amazing maze
+http://massivetechinterview.blogspot.in/2015/07/the-fake-geeks-blog-amazing-maze.html
+
+
+Implement a jigsaw puzzle ~ KodeKnight
+http://massivetechinterview.blogspot.in/2015/07/implement-jigsaw-puzzle-kodeknight.html
+
+Design Othello Game - Shuatiblog.com
+http://massivetechinterview.blogspot.in/2015/07/cc150v5-88-design-othello-game.html
+
+
+
+-- design a database that can store terabytes of data
+http://massivetechinterview.blogspot.in/2015/07/design-database-that-can-store.html
+
+
+Achieving Rapid Response Times in Large Online Services - Jeff Dean
+http://massivetechinterview.blogspot.in/2015/07/achieving-rapid-response-times-in-large.html
+
+
+
+Implementing an immutable class in Java 
+http://massivetechinterview.blogspot.in/2015/07/implementing-immutable-class-in-java.html
+
+
+Design Stock Price Display System
+http://massivetechinterview.blogspot.in/2015/07/get-average-stock-price-every-10.html
+
+
+Java Thread Interview Miscs
+http://massivetechinterview.blogspot.in/2015/07/java-thread-interview-miscs.html
+
+
+Cryptographic Hash, MD5 and Digital signature - Shuatiblog.com
+http://massivetechinterview.blogspot.in/2015/07/design-cryptographic-hash-md5-and.html
+
+
+
+Leader Election
+http://massivetechinterview.blogspot.in/2015/07/leader-election.html
+
+Chord (peer-to-peer) - Distributed Protocol
+http://massivetechinterview.blogspot.in/2015/07/chord-peer-to-peer-distributed-protocol.html
+
+
+Difference between HTTP and HTTPS - Shuatiblog.com
+http://massivetechinterview.blogspot.in/2015/07/design-difference-between-http-and.html
+
+Limit the Request per Second - Shuatiblog.com
+http://massivetechinterview.blogspot.in/2015/07/design-limit-request-per-second.html
+
+
+
+Cohesion and Coupling - Design Principles
+http://massivetechinterview.blogspot.in/2015/07/cohesion-and-coupling-design-principles.html
+
+
+
+Interview - Java Class Loder
+http://massivetechinterview.blogspot.in/2015/07/interview-java-class-loder.html
+
+
+Interview - Java Concurrency
+http://massivetechinterview.blogspot.in/2015/07/interview-java-concurrency.html
+
+
+Interview - Linux Miscs
+http://massivetechinterview.blogspot.in/2015/07/interview-linux-miscs.html
+
+
+Learning Distributed System Design
+http://massivetechinterview.blogspot.in/2017/08/learning-distributed-system-design.html
+
+
+Uber Tech Stack
+http://massivetechinterview.blogspot.in/2015/10/uber-tech-stack.html
+
+
+Design and implementation of a simple Twitter clone using PHP and the Redis key-value store
+https://redis.io/topics/twitter-clone
+
+
+
+Eventually Consistent - Revisited
+http://www.allthingsdistributed.com/2008/12/eventually_consistent.html
+
+125 open source Big Data architecture papers for data professionals.
+https://www.linkedin.com/pulse/100-open-source-big-data-architecture-papers-anil-madan
+
+
+
+Data Manipulation/Science at Scale: Systems and Algorithms
+https://www.coursera.org/learn/data-manipulation
+
+
+differential synchronization
+https://neil.fraser.name/writing/sync/
+
+
+
+
+
+
+Amazon
+
+Design
+
+
+After this discussion, I was given a problem to design Truecaller kind of system
+Then, a problem was given to design a performance management system (appraisal workflow system) that can be used across companies
+
+Design a backend store system for managing inventory and orders with different pricing structure of items across stores. Focus was on schema and API design along with which parts of the system will be centralised and which will be at store level
+
+Implement meeting booking system like outlook.
+
+Design producer/consumer live and offline video streaming system.
+
+Design comment system.
+
+Design pattern for chess game” for which I wrote few classes and explained approaches for the game like peer to peer and client-server but he was not satisfied.
+
+Deep copy of linked list
+
+Question on map reduce, find if all words in a file are palindrome
+
+Design Elevator with OOPS concept
+
+
+Design Twitter
+
+ He asked me to design Parking Lot.
+
+ Implement LRU
+
+Asked me to design the flight system with src, destination and no of hops. (i coded 3.5 pages of solution :))
+
+how to handle server scaling up to sudden increased of request
+
+how to handle scaling the data
+
+Design BookMyShow tables .
+
+Detailed discussion about java hashmap, hashset, its internal working and its complexity.
+
+Design a Railway system – it was very lenghty stuff, i coded around 5 pages.
+
+Given data of millions of people, (name, age, M/F etc.) Develop an API that will have age range as input and yield the count of people under this range as output.
+
+
+ Design Dating application. HLD, then specific discussion of profile search and ranking based on the users’ interest. Discussion on making it scalable.
+
+
+ Design cricket score board.
+
+Design an aggregator service that would be serving various services to a lot of clients. Discussion on how this service can hand billions of data in a request. Code for the service.
+
+
+Design BookMyShow website. Asked me, how will I design UI pages?
+What things I did not like about BookMyShow? And then designing of DB, tables, constraints, etc.
+
+
+Design survey monkey like website.
+More emphasis was on Admin related activities of creating/editing a survey, showing all the surveys created by the admin user.
+Generate a unique link to each of the survey created by the admin.
+Started from UI pages designing to what information should be sent through Ajax calls to server for each of CRUD operations on survey.
+Structure of each table to store the survey information. How will I as a developer create a layered architecture at server side.
+Layered architecture: Ajax -> Servlet -> Class for CRUD operations on surveys –> Transaction Handler –> Persistence layer
+This round was very satisfying round and everything happened properly.
+
+
+Design Outlook meeting request handler, a low level design question.
+I gave some solution and he seemed to be satisfied.
+
+A kind of design question. Given amazon log files of two days.He asked me to find the users who logged in both the days. Had discussion using Hashmap,he want to optimise further I gave solution using trie with little modification in its structure
+
+struct Trie {
+    int count[2],
+    bool isleaf;
+    Trie *child[26];
+    Trie() {
+          count[0]=count[1]=0;
+          isleaf = false;
+          for(int i=0;i < 26;i++)
+          child[i]=NULL;
+    }
+};
+He appreciated me and left.
+
+
+Design an online file repository system
+– What are the use cases
+– Features
+– Security
+– HLD
+– LLD
+
+Design an analytics system
+
+http://www.geeksforgeeks.org/implement-a-phone-directory/
+
+Design recommendation engine.
+It’s like auto suggestion. I gave the trie approach. The interviewer seemed fine with this approach and asked me to write full code with time and space complexities. Implementation of Tries:
+http://www.geeksforgeeks.org/trie-insert-and-search/
+
+
+
+
+
+
+

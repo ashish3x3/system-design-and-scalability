@@ -1,0 +1,357 @@
+
+
+Dropbox :
+10's of million of user
+100s of millions of file syncs per day
+
+challenges:
+1. Write Volume : read to write volume
+most web application has higer read ot write ratio simply bcz people consume more than they poreduce contents..twitter has sothing 100:1 or 1000:1 tweet read vs twitted
+IN dropbox: everyone computer has a complete copy of their entire dropbox... this means we ahve multi peta byte cache memory sitting in front of our service..
+so normal cache concept is out of window bcz we are mesuring cache in term of peta byte of memory
+so our read to write is roughly 1:1 if U see in terms of uploadind files vs downloading files in client system
+we do more weites than read 
+
+
+
+
+2.Atomicity : it has to be all synced or no synced..
+for ex lets say U deeted a folder and share it with other people, and U find that the deleted folder is still there.. we cannot be wrong in such situation
+Atmomicity: it has to be all synced or no synced..
+concsostency : its possible u r updateinfiles to sme dropbox from multiple cmputers..
+isolotion : online and offline consostency..
+durability : it is must to store the data in comrrect format everytime..
+
+As a whole combination of both of high cnsistency requirements and very high write ratios is oneof the hard problem in distributed systems..this is core to our services..
+
+
+
+
+HIgh level architecture:
+
+clinet(computer) ---> server... 
+
+1st probelm: later server run out of disk space so  data gets huge so decided to put in amazon(AWS) S3 and 2nd was server gets over loaded.. so put mysql instance to separate instance os that it can run on separate hardware..DB..
+
+
+2nd problem: capacity on server run out.. to an extent that downloading the fil e will push people out of the being able to acccess site..
+so they want to separet the uploading and downlaoing feature from all these website and syncing functionlty so that they would not interfer with each other..
+
+3rd problem : clinet were hitting the server directly everytime with polling to check fr update to be synced.. but polling os not such a great option as it increas the load on server..
+
+so server were splitted in 2..
+a) meta server : managed hosting ..managing all metadata calls..all logic for DB queries..
+b:  block server: in AWS..all file conctent and accepting all uploads..idea is to make RPC call through block server using meta server..
+c) not server: notification server wihch send signlas to clietns..
+
+
+
+How using mem cahce is difficult when dealing with high consostency
+normal scenario is when one memcahc serer is down ,it uses another..but in case of consistency it creates a problem, then what if one server is thinging memcache is down and another think its p, it will update difrent cache when they actully should be working on one..
+
+
+
+Problem with load balancer:
+created in python, and you can run one thread at time..no parallism.. for each server there can be only one request from server.. one IO and other doning another thing is ok but not two IO parally in pyton..
+problem with using multiple load balancer also adds complexity.. 
+now we use two load balancer per LB one ofr primary and anothr its backup..so we ended up using tiwcemnay LB than normally..
+
+
+Problem with simgle DB:
+we have to shard it in diff machine..
+in sharding many things that work in normakl DB happens fails,,like joins, queries, transactions.
+
+
+shared folder are difficul to shard.. bca its too many quereis from both end like shared table wnats to know the associated users and associated user wants to know the fiel in shared folder... and this query has to be right every time..son sharding is not so obvious choice...currently not sharded..
+
+
+
+
+
+/* COMPLETED */
+
+
+Object Oriented Design Interview Question: Design a Car Parking Lot
+https://www.youtube.com/watch?v=2vtT6TBnOAM
+
+
+Building a scalable TinyUrl application in Java
+https://www.youtube.com/watch?v=igrx08gaBMA
+https://www.youtube.com/watch?v=fMZMm_0ZhK4
+
+
+
+/* END */
+
+**************************************************** ***************************************
+
+/* TO BE COMPLETED */
+
+
+System design interview questions: how to handle web service errors?
+https://www.youtube.com/watch?v=UHPMF6RjMOE
+
+
+Elevator System Design
+https://www.youtube.com/watch?v=RSXgcZIv4xM
+
+
+
+How does Google Search work?
+https://www.youtube.com/watch?v=KyCYyoGusqs
+
+
+Best Practices for Scaling Web Apps
+https://www.youtube.com/watch?v=tQ2V9QSv48M
+
+
+
+
+Complex Systems Design: 15 Design Thinking
+https://www.youtube.com/watch?v=WrdSkqRypsg
+
+
+Coding Interview Problem: Largest Rectangle in a Histogram
+https://www.youtube.com/watch?v=VNbkzsnllsU
+
+
+Object-oriented design: Identifying an inheritance situation | lynda.com tutorial
+https://www.youtube.com/watch?v=oZcLmje8-fg
+
+
+
+Design Patterns for Beginners - New Version
+https://www.youtube.com/watch?v=f5Rzr5mVNbY
+
+
+
+
+Web Crawler - CS101 - Udacity
+https://www.youtube.com/watch?v=CDXOcvUNBaA
+
+
+
+Python Web Crawler Tutorial - 1 - Creating a New Project
+https://www.youtube.com/watch?v=nRW90GASSXE
+
+
+
+
+
+
+Josephus Problem | GeeksforGeeks
+https://www.youtube.com/watch?v=fZ3p2Iw-O2I
+
+
+
+Architecture for Scaling Java Applications to Multiple Servers
+https://www.youtube.com/watch?v=DhKpqGDXRCk
+
+
+Example coding interview: Designing Google Docs
+https://www.youtube.com/watch?v=mDYuJoQEowQ&index=6&list=PLlJy-eBtNFt54Osrl4UbABR-NrWUUAgV_
+
+
+How to Succeed in any Programming Interview
+https://www.youtube.com/watch?v=5KB5KAak6tM&index=8&list=PLlJy-eBtNFt54Osrl4UbABR-NrWUUAgV_
+
+
+Building Software Systems At Google and Lessons Learned
+https://www.youtube.com/watch?v=modXC5IWTJI
+
+
+Mongodb interview questions | nosql mongodb
+https://www.youtube.com/watch?v=x1iFJLBsrqY
+
+
+Amazon Coding Interview: Count Negative Integers in Row/Column-Wise Sorted Matrix
+https://www.youtube.com/watch?v=5dJSZLmDsxk
+
+
+
+Prep for Interview - System Design
+https://www.youtube.com/watch?v=FScBJEyz7sg&list=PLNIZo6N8Gh1L00q3N1FaZWUAljWaw9BNg
+
+
+Passing the Google interview as a software engineer
+https://www.youtube.com/watch?v=7Lz6z9k_HvE
+
+
+
+Building Scalable Web Applications Using Microservices Architecture and NodeJS inside AWS Lambda
+https://www.youtube.com/watch?v=n_MDBaKLuG4
+
+
+Performance and Scalability Basics
+https://www.youtube.com/watch?v=Mzmh1VewKUI
+
+
+
+CS75 (Summer 2012) Lecture 9 Scalability Harvard Web Development David Malan
+https://www.youtube.com/watch?v=-W9F__D3oY4&list=PL1KnSUZUbkdBH8z4F_ydW0tKxWeRnYaht
+
+
+Scaling your Website with Memcached, discussion with Northscale cofounder
+https://www.youtube.com/watch?v=uMxZ4RI6sCQ&index=3&list=PL_ODyL-jNdIAbwqJ-_hcrpgqsbeF1dLgt
+
+
+
+
+How to answer design question: How do you design a twitter?
+https://www.youtube.com/watch?v=gX8S7b8UYl8
+
+
+
+Episode 06: Intro to Architecture and Systems Design Interviews
+https://www.youtube.com/watch?v=ZgdS0EUmn70
+
+
+Scaling Databases - Web Development
+https://www.youtube.com/watch?v=dkhOZOmV7Fo
+
+
+
+
+Maximum Rectangular Area in Histogram
+https://www.youtube.com/watch?v=ZmnqCZp9bBs
+
+Google Interview Question: Water in a Bar Graph.
+https://www.youtube.com/watch?v=UzeL2GcLx3Y
+
+Google Interview Question: Copy Linked List with Special Pointer
+https://www.youtube.com/watch?v=-ExVoZXedo4
+
+
+
+Hotel Booking Array Interview question
+https://www.youtube.com/watch?v=x7eABYgjN5c
+
+
+Toughest Coding Interview Questions: Identify the Celebrity
+https://www.youtube.com/watch?v=HZLuk8vulSA
+https://www.youtube.com/watch?v=LtGnA5L6LIk
+
+
+
+The Stock Span Problem | GeeksforGeeks
+https://www.youtube.com/watch?v=LvQzYMXEANs
+https://www.youtube.com/watch?v=udhIhg8GHkk
+
+Flattening a Linked List | GeeksforGeeks
+https://www.youtube.com/watch?v=PSKZJDtitZw
+
+
+Programming Interview Question: Trapping Rain Water between Towers Problem
+https://www.youtube.com/watch?v=KV-Eq3wYjxI
+
+
+
+Programming Interview Question: design a stack with min(stack) operation in constant time
+https://www.youtube.com/watch?v=8Ub73n4ySYk
+
+
+How Uber Uses Your Phone as a Backup Data Center
+https://www.youtube.com/watch?v=0EhTOKcwRok
+
+Taking Storage for a Ride with Uber
+https://www.youtube.com/watch?v=Dg76cNaeB4s
+
+GOTO 2016 • What I Wish I Had Known Before Scaling Uber to 1000 Services • Matt Ranney
+https://www.youtube.com/watch?v=kb-m2fasdDY
+
+
+GOTO 2014 • Scaling Pinterest • Marty Weiner
+https://www.youtube.com/watch?v=jQNCuD_hxdQ
+
+Scalability at YouTube
+https://www.youtube.com/watch?v=G-lGCC4KKok&index=5&list=PL0Y_2IC0HVg-1QX9WYyCQFBboMXikr89i
+
+
+Scaling Redis at Twitter
+https://www.youtube.com/watch?v=rP9EKvWt0zo&index=9&list=PL0Y_2IC0HVg-1QX9WYyCQFBboMXikr89i
+
+
+
+Webinar 2012: 7 Steps to Select the Right Architecture for Your Web Application on AWS
+https://www.youtube.com/watch?v=Ypwi1Ics91Y&list=PLNIZo6N8Gh1J64HfYeE_A8QHp9aCDsa1c
+
+
+
+
+
+Scaling Memcache at Facebook
+https://www.youtube.com/watch?v=6phA3IAcEJ8&list=PLFBl577hcUawDM3OtijouM-TugJxAWUC1&index=39
+
+
+
+
+How to choose a high-availability solution for MySQL
+https://www.youtube.com/watch?v=cLG0Q4r0hBk&list=PLFBl577hcUawDM3OtijouM-TugJxAWUC1&index=41
+
+
+
+7 Key MySQL Clustering Technologies to Consider
+https://www.youtube.com/watch?v=_oZpzcxquIM&list=PLFBl577hcUawDM3OtijouM-TugJxAWUC1&index=42
+
+
+
+
+The Coding Interview
+
+What is an index?
+https://www.youtube.com/watch?v=8T7TY1tMB2I
+
+
+What is a web service
+https://www.youtube.com/watch?v=KPnW0Pdfa-w
+
+
+Whats the difference between a Statement vs Prepared Statement?
+https://www.youtube.com/watch?v=798RIL7QQ08
+
+
+
+What is an immutable class?
+https://www.youtube.com/watch?v=Ifb6wNejn2M
+
+
+
+What is data integration?
+https://www.youtube.com/watch?v=mOAZzKoQmMs
+
+
+
+
+https://dzone.com/refcardz/design-patterns
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

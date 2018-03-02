@@ -1,0 +1,40 @@
+
+7 Things Most People Ignored In a Coding Interview
+
+
+
+Big-O analysis
+	Sometimes the algorithm is so tricky that the interviewer himself may not know about the answer, but in this case interviewers still want to see how candidates analysis the problem. The expectation is not a correct answer, but the whole analysis process. Unfortunately most people just give it up.
+
+Input validation
+	As the robustness principle said “Code that sends commands or data to other machines should conform completely to the specifications, but code that receives input should accept non-conformant input as long as the meaning is clear.”
+
+
+
+a-step-by-step-guide-to-dynamic-programming
+http://blog.gainlo.co/index.php/2015/10/22/a-step-by-step-guide-to-dynamic-programming/
+
+
+Studying for a Tech Interview Sucks, so Here's a Cheat Sheet to Help
+https://gist.github.com/TSiege/cbb0507082bb18ff7e4b
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

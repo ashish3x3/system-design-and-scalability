@@ -1,0 +1,295 @@
+
+
+https://www.youtube.com/watch?v=84nV_OuKzts&index=3&list=PLVi1LmRuKQ0NINQfjKLVen7J2lZFL35wP
+
+
+Redit Scaling
+
+
+Code Organisation
+
+We start with 2,3  imp folder in each project
+Main.py which contains different handlers and url mapping..later we move handlers out to there respective file and only import them in main.py 
+
+static folder -- for css, js, images
+
+DB Models -- object relational mapping(ORM)..maps python object to relational DB..db.model().. ile takes the python object and abstract awaw all the query and cursor,etc.. also includes all the files which query DB to pull out specfic info like top post, top quest, password hahing using some utility func,etc..as it grows we move thees tothere individual files
+
+
+utils.py ..bunch of utility fucnction not depedent n any part f code..any func can use it..throughtout the project
+
+
+
+Hosting:
+Problem with Local Hosting : 
+fine for single user
+not alwasy on
+not alwsy accessible ..power goes down
+IP may change(staic IP is a solution but U have to pay for it..)
+
+
+Co-locate:
+control over the machine
+pay for rent,power, bandwidth
+high amout of work..buy rack, lookk for all changes,etc..all admin work
+
+
+Manged Hosting:
+AWS,rackspace,linode...i.e rent machine all set up for you..configure for you..
+best options 
+medium system admin
+redit uses AWS
+
+
+Google App engine/Heroku
+Zero Sys Admin
+diff customization..ther could be scenario ur hosting app may not have handle for you..it become diff then..
+no machince/OS
+udacity buit ofgogle app engine
+
+
+
+
+How to choose Frameworks:
+
+Important features:
+direct GTE/POST, request, headers manipulation
+Http scheduling,url mapping
+
+Not important:
+sessions
+caching
+forms
+DB ORM
+magic
+thse feature may not do exctku what U r looking for and acts like magic and its hard to scale such system when U cant control these fetaure.so we end of writinf our own..
+
+
+
+
+
+
+Redit Architecture:
+
+separating app sever from db server gave us 4X speed improvement.. 2 machine
+App server  in python
+SB server --Postgres
+
+Tabls : 
+Links -- score, title, url
+votes -- linkId, ..
+users --name, username,pass
+comments --linkId,contensts,authorId
+lot of joins
+
+Supervise : a program which checks for your app server, if it dies it wil start again..availability
+
+Thing DB:
+we were facing issue with adding new feature bcz for each new feature we have to update our Db with certain new fields, and then do data migration,indexing,etc..
+we ended up using thingDB...it has just two things 
+1. meta table .. this will ahve all column that is across all feature.score, authorId, date
+2. data table .. this will store data petaing to meta table.. metaId, key, value 
+					i.e 1, url, xyzcom,
+					    1,  title, ABC
+
+
+
+Scaling:
+
+we have a load balancer to rout ot our app server
+and a memechane tht wil be shared among all the app server
+
+
+we scaled the DB to it individual DBs, like Links will be one DB, comments will be another with their replica in place for availability
+
+we never did dharding..that we regret..
+alasy do the hardest part up front bcz later it bcz almost impossibel..
+
+we wrote our python framweork web.py and used it intialy before moving to pylons..
+
+
+
+Precomputed Caching
+
+we have to compute lotof things like top post, hot article, hot article for user, top votes by user,etc and we wrote acron job that does this and stoe th eresult in mem cache.. but over time we were calcultaing too many things and out DB load gor increase..os we created queue and replicas of the DBa nd the job of the quesutis to fetch the requset like getht ehost artcile, get the trending articel,etc and precompute against the DB replicas in this way real DB were never toucjd and no request evern wen directly yo real DB only th job queue...an stre the result in memec ache
+so everything U see nfthe redit is actauly fetch from the memcache and not DB..thi made things lot easier..
+
+
+
+Load Balancer:
+HA Proxy is the LB
+we also have akamai it slike CDN, we pay them to ping our site at times and cache the conctents..it isused for logged out user who see the same contect..logged in user directly reach HAProxy with their username and pasword..
+
+
+App Server Architecture
+
+we put statci contecnt on AWS S3...and akamai serve staic ocntent to suers..for styling,etc
+
+NGINX..web server..
+
+
+
+Database Architecture 
+
+if you don't do joins its loa teasier to scale..
+
+we have Londiste which will replicate the insert to all replica DB
+
+
+
+Cache Architecture
+
+replication lag --- what we do is we write to DBand memcahce both togeter..so that if Uwant to go peramlink, your daat is good to go....
+peramlink..i.e after creating ocntent when U publich and save to DB, U want ot get redirted to the published page..thts paramlink..
+
+
+Precompute cluster -- whenever you cliked alink or subkit a Note, we would cubmit a job to this queue ..jobs will be like update the front page, update the user liked page, like a vote afftects whoole lotof things like your like listings, new page, etc... it has replica of DB tables against which the queue will do all its precomutations..
+
+what this quee does is precompute all those thiggs and stoein thememcache.. few things require no DB access like if oyu submit a new articel we wil put it in top of your home page without much DB efrtos..
+
+memcacheDB...tis similar to memcahce but its persistent and small check of memeory.. precomputed data gets dtored in memcacDB.. acts like middle layer Cache..
+
+
+
+Problems with Memcachedb
+
+memcahceDB was not designed for heavy load.. and precompute server is throwing to much load on it and eventually we have to remove it with casendra which is a distributed noSql DB..
+
+it provides automatic sharding..
+
+
+
+Locking and Memcache
+
+now we use consisten hashing(1/10th of key changes if one lost one node) earlier we were using modular hasing(9/10th of key changes if one lost one node)..
+
+to do soe real time chage we need to implemt locking..so if lotof users are at a same redit page and we need to update there preferene we need lot of locking..
+
+now problem with this locking from memcache..global lock... proble is with memcahce if U lose a single node U los the site bcz U canoot throw away that node potentaily say half the apps can't see the memcache node and otehr can, so the one who don't see the node decded to nottalk to him any more and they try to lock on different set of server..
+
+
+
+Zookeeper
+we changehte way we lovk bcz single node failuer we lodt the site.. so we are not useing memcache locking..
+
+we are removing lovking to somthing called zookeeper, it has mcuj higher availability.. and its likea trees tructire and can implement locking..
+
+there isa master and otehr are read replicants.. client can write to any of the node in zookeeper..
+
+we will be moving dynamic configuration type of stuff to zoo keeper and zookeeper provides watches on the node so that the apps can get notifucationw hen somthing changes  .so we can just say we wantt oichage the addon the front page and sets somting on zookepper and all apps updates themeselves..
+
+
+Improving Memcache 
+
+we will ahve self healing memcache raher then one node die and entire site behave litle weird.. we can add more memcache but it will increse chance of failure..
+
+
+
+Precompute Architecture
+
+So we rmve the procompute server adn use map reduce.. we stilll ahve queue but not for pre compur purpose..
+
+so instead of runnign jobs like if U remove a link from your fav links, server will simply fetch the precomputed fav from the casandra, remoevethat linkan push it back ot casandra without running it rhrough pre computed servers.
+there are few jons that canno tbe don directly sothingt at nees to be done for ntire mass
+like  top links of the hour.. it has to computed for all users.. we use Map reduce.. 
+
+what it des is it will dump every link that is submitted inthe last hour groups them and figre out hwere it shoud go and then completely overrite those listing everying 15 min..
+
+
+Data for map reduce is coming out of postgres.. we have a replica of links table for map reduce.. we dont't need any othr table data for map reduce for bcz the kind of jobs we are running is diffrent..
+
+
+Mapreduce 
+
+its like a batch job across huge anountof data
+
+Map : given this list of things apply this function to it
+Reduce:  given this two things apply this functin adn combinethem inot one
+
+google make Map reduce by building indexes for web using map reduce..
+
+
+
+Hadoop 
+
+using alanguage called PIG
+hadoop is a map reduce system and it has the advantage of distributing all these map aross the cluster of nodes
+
+and we are using amazon elaastci map reduce which is hosted hadoop
+
+
+
+Dealing with Search Indexing
+
+since they have lot of data nd lot of them are old .. and thera re lotsof cmments..like if U open a 3 year back article which no one has seen in 3 months..probabilityis hthat ift will not be in cache, so that require pulling all 500 comment sto the cache ande ach ofhtem will nbe a cahce miss and its aecpensive op for the DB..
+and gogle will open year old redit notes in top 10 search qresult..so lot of traffci was from google..
+
+so we have to build separate multiple app serve and multiple comments replcia DB jsut for google and not touching oridnalDB for google traffic.. whoole seapate stack for google.. read only..
+
+
+
+
+Using the Queue
+
+lot of things like when U upvote of hit an API, or new upvaor happends,etc all it does is insert in into the Queue and nothing else..and later it happens in thebackground.. so if one of the DB is going slow or doing some write it dosen;t affectt he user
+ and we this for lot of stuff now and moving lot toward it.. e.g RabbitMQ(earlier queue system),MQP(curent queue)
+
+all the appserver a re writng to the queue and then theraa re small bunch of mache that are reading from the queue.. 
+
+then they see what they need to update like which listing needs ot updatd, and this require lot of locking in the casandra
+
+
+
+Lock Contention
+
+the queue process taek our the one que job and do the upate like listing,upvotes etc and all that do is lot of locking in the casandra.. 
+and we have lot of these processors for vote and we get lot of simultaneoue votes so weneed a lot of them but we have too many i turned out they were all fighting fo those locks and just having those number of queue processors fed up the quee processing..
+
+we need lot of precesspr to do queu processing but having too many accounted to that tey were fighting each other for loacks
+
+we are trying to moveout of locking in casandra.. we do it so that two thread can access same data..
+
+we run lot of processes in amachine but not multi threade,,Os do the task scheduluign and switching for us..
+
+
+all stuff is online..entire technologies..
+
+
+
+
+Spam Prevention 
+
+links <a rel ="nofollow" href ... what this des for sp,ers is noffol tells tht this link goes no where,,so google will not put authority onthet link..bcz all spammenrs waht is links to there site sot hat it has sone authrity ad appear top on result..setting it to noffolw helped..we dont put n evey link but those with no upvoytes,etc..
+
+2nd heuristics : people whc post and comment frst ontheor oe=wn article..wh does that..thy are cought..
+3. submission.. if someone is submission at odd times and not very related, it irobabl a spam
+4. didn;t ket U know whn caught..ther is delat=y in upvote getting ncreased and you clicking..so U will nebr know heter ur upvote couted o not..
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

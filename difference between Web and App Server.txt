@@ -1,0 +1,73 @@
+difference between Web and App Server
+
+
+
+Web server:
+Process HTTP req by respnfond html pages
+serves tatic content html,images,etc
+no serve side scripting
+no DB,dynamic genration html
+
+types of web serve :
+apache http sever, IIS, sun java system web server
+
+clint ----> web server
+
+
+
+
+
+Application server:
+serves business login o application programs through various protocola
+handles all application operations between users and an organisation backend business
+deply applicatiopns
+parts of app server
+web container, application clients,EJB contaner
+
+type od app server
+apachje tomcat, jboss, weblogic, websphere
+
+
+clinet ----> app server ----> DB
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

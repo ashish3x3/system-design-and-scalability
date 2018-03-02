@@ -1,0 +1,40 @@
+
+
+Memchance accepts one write at a time,it does it fasr but it accepts only ne write at a time.. so any one of th econcurrent proess can run save to chace at a time
+
+
+
+Too much load on DB:  replicate the master scale model
+too much data: shard data across multiple machine,etc DB
+
+
+Downside of Shardng:
+impossibele joins
+complex queries..like if shard key is not preset query wil go to all the shards..evemtually complet eDB and much slower..
+
+
+
+
+
+
+It gets interesting when you start to have multiple machines
+
+
+120737
+bhai = 10
+raj = 10
+rent = 7
+card = 80
+ remaining: 13
+
+ biru 23
+ mahntesh 4
+ veera bh 15
+ nagraj 4500
+
+
+
+
+
+
+

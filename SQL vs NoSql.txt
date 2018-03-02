@@ -1,0 +1,445 @@
+
+
+SQL vs NoSQL: The Differences
+https://www.sitepoint.com/sql-vs-nosql-differences/
+https://www.sitepoint.com/sql-vs-nosql-choose/
+https://www.thoughtworks.com/insights/blog/nosql-databases-overview
+
+
+*****************************
+
+SQL databases:
+
+store related data in tables
+require a schema which defines tables prior to use
+encourage normalization to reduce data redundancy
+support table JOINs to retrieve related data from multiple tables in a single command
+implement data integrity rules
+provide transactions to guarantee two or more updates succeed or fail as an atomic unit
+can be scaled (with some effort)
+use a powerful declarative language for querying
+offer plenty of support, expertise and tools.
+NoSQL databases:
+
+store related data in JSON-like, name-value documents
+can store data without specifying a schema
+must usually be denormalized so information about an item is contained in a single document
+should not require JOINs (presuming denormalized documents are used)
+permit any data to be saved anywhere at anytime without verification
+guarantee updates to a single document — but not multiple documents
+provide excellent performance and scalability
+use JSON data objects for querying
+are a newer, exciting technology.
+
+
+SQL is digital. It works best for clearly defined, discrete items with exact specifications. Typical use cases are online stores and banking systems.
+
+NoSQL is analog. It works best for organic data with fluid requirements. Typical use cases are social networks, customer management and web analytics systems.
+
+Projects where SQL is ideal:
+
+logical related discrete data requirements which can be identified up-front
+data integrity is essential
+standards-based proven technology with good developer experience and support.
+Projects where NoSQL is ideal:
+
+unrelated, indeterminate or evolving data requirements
+simpler or looser project objectives, able to start coding immediately
+speed and scalability is imperative.
+
+https://www.sitepoint.com/sql-vs-nosql-choose/
+Scenario One: a Contact List
+
+id
+title
+firstname
+lastname
+gender
+telephone
+email
+address1
+address2
+address3
+city
+region
+zipcode
+country
+
+
+The NoSQL Alternative
+{
+  name: [
+    "Billy", "Bob", "Jones"
+  ],
+  company: "Fake Goods Corp",
+  jobtitle: "Vice President of Data Management",
+  telephone: {
+    home: "0123456789",
+    mobile: "9876543210",
+    work: "2244668800"
+  },
+  email: {
+    personal: "bob@myhomeemail.net",
+    work: "bob@myworkemail.com"
+  },
+  address: {
+    home: {
+      line1: "10 Non-Existent Street",
+      city: "Nowhere",
+      country: "Australia"
+    }
+  },
+  birthdate: ISODate("1980-01-01T00:00:00.000Z"),
+  twitter: '@bobsfakeaccount',
+  note: "Don't trust this guy",
+  weight: "200lb",
+  photo: "52e86ad749e0b817d25c8892.jpg"
+}
+
+
+Scenario Two: a Social Network
+Most data updates have a single point of origin: the user. It’s unlikely we’ll need to update two or more records at any one time, so transaction-like functionality is not required.
+Despite what some users may think, a failed status update is unlikely to cause a global meltdown or financial loss. The application’s interface and performance take a higher priority than robust data integrity.
+
+{
+  user_id: ObjectID("65f82bda42e7b8c76f5c1969"),
+  update: [
+    {
+      date: ISODate("2015-09-18T10:02:47.620Z"),
+      text: "feeling more positive today"
+    },
+    {
+      date: ISODate("2015-09-17T13:14:20.789Z"),
+      text: "spending far too much time here"
+    }
+    {
+      date: ISODate("2015-09-17T12:33:02.132Z"),
+      text: "considering my life choices"
+    }
+  ]
+}
+
+
+Scenario Three: a Warehouse Management System
+In its simplest form, we’re recording the transfer of items from one physical area to another — or removing from location A and placing in location B. That’s two updates for the same action.
+
+We need a robust store with enforced data integrity and transaction support. Only an SQL database will (currently) satisfy those requirements.
+
+**************
+
+sql-vs-nosql-differences
+https://www.sitepoint.com/sql-vs-nosql-differences/
+
+
+
+SQL Tables vs NoSQL Documents
+SQL databases provide a store of related data tables
+NoSQL databases store JSON-like field-value pair documents, e.g.
+{
+  ISBN: 9780992461225,
+  title: "JavaScript: Novice to Ninja",
+  author: "Darren Jones",
+  format: "ebook",
+  price: 29.00
+}
+Similar documents can be stored in a collection, which is analogous to an SQL table.
+However, you can store any data you like in any document; the NoSQL database won’t complain. For example:
+
+{
+  ISBN: 9780992461225,
+  title: "JavaScript: Novice to Ninja",
+  author: "Darren Jones",
+  year: 2014,
+  format: "ebook",
+  price: 29.00,
+  description: "Learn JavaScript from scratch!",
+  rating: "5/5",
+  review: [
+    { name: "A Reader", text: "The best JavaScript book I've ever read." },
+    { name: "JS Expert", text: "Recommended to novice and expert developers alike." }
+  ]
+}
+SQL tables create a strict data template, so it’s difficult to make mistakes. NoSQL is more flexible and forgiving, but being able to store any data anywhere can lead to consistency issues.
+
+SQL Schema vs NoSQL Schemaless
+primary keys — unique identifiers such as the ISBN which apply to a single record
+indexes — commonly queried fields indexed to aid quick searching
+relationships — logical links between data fields
+functionality such as triggers and stored procedures.
+
+In a NoSQL database, data can be added anywhere, at any time. There’s no need to specify a document design or even a collection up-front. For example, in MongoDB the following statement will create a new document in a new book collection if it’s not been previously created:
+
+db.book.insert(
+  ISBN: 9780994182654,
+  title: "Jump Start Git",
+  author: "Shaumik Daityari",
+  format: "ebook",
+  price: 29.00
+);
+(MongoDB will automatically add a unique _id value to each document in a collection. You may still want to define indexes, but that can be done later if necessary.)
+
+db.contact.createIndex({ "$**": "text" });
+
+A NoSQL database may be more suited to projects where the initial data requirements are difficult to ascertain.
+
+
+SQL Normalization vs NoSQL Denormalization
+
+Presume we want to add publisher information to our book store database. A single publisher could offer more than one title so, in an SQL database, we create a new publisher table:
+
+We can then add a publisher_id field to our book table, which references records by publisher.id:
+
+This minimizes data redundancy; we’re not repeating the publisher information for every book — only the reference to it. This technique is known as normalization, and has practical benefits. We can update a single publisher without changing book data.
+
+We can use normalization techniques in NoSQL. Documents in the book collection —
+
+{
+  ISBN: 9780992461225,
+  title: "JavaScript: Novice to Ninja",
+  author: "Darren Jones",
+  format: "ebook",
+  price: 29.00,
+  publisher_id: "SP001"
+}
+— reference a document in a publisher collection:
+
+{
+  id: "SP001"
+  name: "SitePoint",
+  country: "Australia",
+  email: "feedback@sitepoint.com"
+}
+However, this is not always practical, for reasons that will become evident below. We may opt to denormalize our document and repeat publisher information for every book:
+
+{
+  ISBN: 9780992461225,
+  title: "JavaScript: Novice to Ninja",
+  author: "Darren Jones",
+  format: "ebook",
+  price: 29.00,
+  publisher: {
+    name: "SitePoint",
+    country: "Australia",
+    email: "feedback@sitepoint.com"
+  }
+}
+This leads to faster queries, but updating the publisher information in multiple records will be significantly slower.
+
+
+SQL Relational JOIN vs NoSQL
+SQL queries offer a powerful JOIN clause. We can obtain related data in multiple tables using a single SQL statement. For example:
+
+SELECT book.title, book.author, publisher.name
+FROM book
+LEFT JOIN book.publisher_id ON publisher.id;
+This returns all book titles, authors and associated publisher names (presuming one has been set).
+
+NoSQL has no equivalent of JOIN, and this can shock those with SQL experience. If we used normalized collections as described above, we would need to fetch all book documents, retrieve all associated publisher documents, and manually link the two in our program logic. This is one reason denormalization is often essential.
+
+
+SQL vs NoSQL Data Integrity
+
+ensure all books have a valid publisher_id code that matches one entry in the publisher table, and
+not permit publishers to be removed if one or more books are assigned to them.
+The schema enforces these rules for the database to follow. It’s impossible for developers or users to add, edit or remove records, which could result in invalid data or orphan records.
+
+The same data integrity options are not available in NoSQL databases; you can store what you want regardless of any other documents. Ideally, a single document will be the sole source of all information about an item.
+
+SQL vs NoSQL Transactions
+In SQL databases, two or more updates can be executed in a transaction — an all-or-nothing wrapper that guarantees success or failure. For example, presume our book store contained order and stock tables. When a book is ordered, we add a record to the order table and decrement the stock count in the stock table. If we execute those two updates individually, one could succeed and the other fail — thus leaving our figures out of sync. Placing the same updates within a transaction ensures either both succeed or both fail.
+
+In a NoSQL database, modification of a single document is atomic. In other words, if you’re updating three values within a document, either all three are updated successfully or it remains unchanged. However, there’s no transaction equivalent for updates to multiple documents. There are transaction-like options, but, at the time of writing, these must be manually processed in your code.
+
+
+SQL vs NoSQL CRUD Syntax
+SQL is a lightweight declarative language. It’s deceptively powerful, and has become an international standard, although most systems implement subtly different syntaxes.
+NoSQL databases use JavaScripty-looking queries with JSON-like arguments! Basic operations are simple, but nested JSON can become increasingly convoluted for more complex queries.
+
+INSERT INTO book (
+  `ISBN`, `title`, `author`
+)
+VALUES (
+  '9780992461256',
+  'Full Stack JavaScript',
+  'Colin Ihrig & Adam Bretz'
+);
+
+db.book.insert({
+  ISBN: "9780992461256",
+  title: "Full Stack JavaScript",
+  author: "Colin Ihrig & Adam Bretz"
+});
+
+UPDATE book
+SET price = 19.99
+WHERE ISBN = '9780992461256'
+
+db.book.update(
+  { ISBN: '9780992461256' },
+  { $set: { price: 19.99 } }
+);
+
+return all book titles over $10
+SELECT title FROM book
+WHERE price > 10;
+
+db.book.find(
+  { price: { &gt;: 10 } },
+  { _id: 0, title: 1 }
+);
+The second JSON object is known as a projection: it sets which fields are returned (_id is returned by default so it needs to be unset).
+
+count the number of SitePoint books
+SELECT COUNT(1) FROM book
+WHERE publisher_id = 'SP001';
+
+db.book.count({
+  "publisher.name": "SitePoint"
+});
+This presumes denormalized documents are used.
+
+
+
+SQL vs NoSQL Performance
+Perhaps the most controversial comparison, NoSQL is regularly quoted as being faster than SQL. This isn’t surprising; NoSQL’s simpler denormalized store allows you to retrieve all information about a specific item in a single request. There’s no need for related JOINs or complex SQL queries.
+
+That said, your project design and data requirements will have most impact. A well-designed SQL database will almost certainly perform better than a badly designed NoSQL equivalent and vice versa.
+
+SQL vs NoSQL Scaling
+As your data grows, you may find it necessary to distribute the load among multiple servers. This can be tricky for SQL-based systems. How do you allocate related data? Clustering is possibly the simplest option; multiple servers access the same central store — but even this has challenges.
+
+NoSQL’s simpler data models can make the process easier, and many have been built with scaling functionality from the start
+
+SQL vs NoSQL Practicalities
+Developers and sysadmins have less experience with newer database systems, so mistakes are made. Opting for NoSQL because it feels fresher, or because you want to avoid schema design inevitably, leads to problems later.
+
+****************
+
+
+SQL vs NoSQL Data Integrity
+The same data integrity options are not available in NoSQL databases; you can store what you want regardless of any other documents.
+
+SQL vs NoSQL Transactions
+In a NoSQL database, modification of a single document is atomic. In other words, if you’re updating three values within a document, either all three are updated successfully or it remains unchanged. However, there’s no transaction equivalent for updates to multiple documents. There are transaction-like options, but, at the time of writing, these must be manually processed in your code.
+
+
+
+NoSQL does not have a prescriptive definition but we can make a set of common observations, such as:
+NoSQL what does it mean
+Not using the relational model
+Running well on clusters ..Relational databases were not designed to run efficiently on clusters.
+Mostly open-source
+Built for the 21st century web estates
+Schema-less
+
+
+Why NoSQL Databases
+Application developers have been frustrated with the impedance mismatch between the relational data structures and the in-memory data structures of the application. Using NoSQL databases allows developers to develop without having to convert in-memory structures to relational structures.
+
+
+The data storage needs of an ERP application are lot more different than the data storage needs of a Facebook or an Etsy, for example.
+
+
+An aggregate is a collection of data that we interact with as a unit.
+These units of data or aggregates form the boundaries for ACID operations with the database, Key-value, Document, and Column-family databases can all be seen as forms of aggregate-oriented database.
+
+Aggregates make it easier for the database to manage data storage over clusters, since the unit of data now could reside on any machine and when retrieved from the database gets all the related data along with it.
+
+Aggregate-oriented databases work best when most data interaction is done with the same aggregate, for example when there is need to get an order and all its details, it better to store order as an aggregate object but dealing with these aggregates to get item details on all the orders is not elegant.
+i.e it works best when get single record as one rather than two operation from differetn collection beased on each other
+
+Aggregate-oriented databases make inter-aggregate relationships more difficult to handle than intra-aggregate relationships.
+
+
+Distribution Models:
+Aggregate oriented databases make distribution of data easier, since the distribution mechanism has to move the aggregate and not have to worry about related data, as all the related data is contained in the aggregate. There are two styles of distributing data:
+
+Sharding: Sharding distributes different data across multiple servers, so each server acts as the single source for a subset of data.
+Replication: Replication copies data across multiple servers, so each bit of data can be found in multiple places. Replication comes in two forms,
+Master-slave replication makes one node the authoritative copy that handles writes while slaves synchronize with the master and may handle reads.
+Peer-to-peer replication allows writes to any node; the nodes coordinate to synchronize their copies of the data.
+Master-slave replication reduces the chance of update conflicts but peer-to-peer replication avoids loading all writes onto a single server creating a single point of failure. A system may use either or both techniques. Like Riak database shards the data and also replicates it based on the replication factor.
+
+
+CAP theorem:
+the CAP theorem which states that in any distributed system we can choose only two of consistency, availability or partition tolerance.
+
+There are essentially three variables r, w, n where
+
+r=number of nodes that should respond to a read request before its considered successful.
+w=number of nodes that should respond to a write request before its considered successful.
+n=number of nodes where the data is replicated aka replication factor.
+In a Riak cluster with 5 nodes, we can tweak the r,w,n values to make the system very consistent by setting r=5 and w=5 but now we have made the cluster susceptible to network partitions since any write will not be considered successful when any node is not responding. We can make the same cluster highly available for writes or reads by setting r=1 and w=1  but now consistency can be compromised since some nodes may not have the latest copy of the data. The CAP theorem states that if you get a network partition, you have to trade off availability of data versus consistency of data. Durability can also be traded off against latency, particularly if you want to survive failures with replicated data.
+
+
+
+Understanding these requirements becomes much more important, for long we have been used to the default of  RDBMS which comes with a standard set of features no matter which product is chosen and there is no possibility of choosing some features over other. The availability of choice in NoSQL databases, is both good and bad at the same time. Good because now we have choice to design the system according to the requirements. Bad because now you have a choice and we have to make a good choice based on requirements and there is a chance where the same database product may be used properly or not used properly.
+
+
+Most NoSQL databases do not provide transaction support by default, which means the developers have to think how to implement transactions, does every write have to have the safety of transactions or can the write be segregated into “critical that they succeed” and “its okay if I lose this write” categories. Sometimes deploying external transaction managers like ZooKeeper can also be a possibility.
+
+
+
+Types of NoSQL Databases:
+
+1. Key-Value databases
+Some of the popular key-value databases are Riak, Redis (often referred to as Data Structure server), Memcached and its flavors, Berkeley DB, upscaledb (especially suited for embedded use), Amazon DynamoDB (not open-source), Project Voldemort and Couchbase.
+
+All key-value databases are not the same, there are major differences between these products, for example: Memcached data is not persistent while in Riak it is, these features are important when implementing certain solutions. Lets consider we need to implement caching of user preferences, implementing them in memcached means when the node goes down all the data is lost and needs to be refreshed from source system, if we store the same data in Riak we may not need to worry about losing data but we must also consider how to update stale data.
+
+
+2. Document databases
+
+Some of the popular document databases we have seen are MongoDB, CouchDB , Terrastore, OrientDB, RavenDB, and of course the well-known and often reviled Lotus Notes that uses document storage.
+
+Documents are the main concept in document databases. The database stores and retrieves documents, which can be XML, JSON, BSON, and so on. These documents are self-describing, hierarchical tree data structures which can consist of maps, collections, and scalar values
+Document databases such as MongoDB provide a rich query language and constructs such as database, indexes etc allowing for easier transition from relational databases.
+
+
+
+3. Column family stores
+
+Column-family databases store data in column families as rows that have many columns associated with a row key (Figure 10.1). Column families are groups of related data that is often accessed together. For a Customer, we would often access their Profile information at the same time, but not their Orders.
+
+
+Each column family can be compared to a container of rows in an RDBMS table where the key identifies the row and the row consists of multiple columns. The difference is that various rows do not have to have the same columns, and columns can be added to any row at any time without having to add it to other rows.
+
+When a column consists of a map of columns, then we have a super column. A super column consists of a name and a value which is a map of columns. Think of a super column as a container of columns.
+
+Cassandra is one of the popular column-family databases; there are others, such as HBase, Hypertable, and Amazon DynamoDB. Cassandra can be described as fast and easily scalable with write operations spread across the cluster. The cluster does not have a master node, so any read and write can be handled by any node in the cluster.
+
+
+4. Graph Databases
+Graph databases allow you to store entities and relationships between these entities. Entities are also known as nodes, which have properties. Think of a node as an instance of an object in the application. Relations are known as edges that can have properties.
+
+
+Usually, when we store a graph-like structure in RDBMS, it's for a single type of relationship ("who is my manager" is a common example). Adding another relationship to the mix usually means a lot of schema changes and data movement, which is not the case when we are using graph databases. Similarly, in relational databases we model the graph beforehand based on the Traversal we want; if the Traversal changes, the data will have to change.
+
+In graph databases, traversing the joins or relationships is very fast. The relationship between nodes is not calculated at query time but is actually persisted as a relationship. Traversing persisted relationships is faster than calculating them for every query.
+
+
+Relationships are first-class citizens in graph databases; most of the value of graph databases is derived from the relationships. Relationships don't only have a type, a start node, and an end node, but can have properties of their own. Using these properties on the relationships, we can add intelligence to the relationship—for example, since when did they become friends, what is the distance between the nodes, or what aspects are shared between the nodes. These properties on the relationships can be used to query the graph.
+
+Since most of the power from the graph databases comes from the relationships and their properties, a lot of thought and design work is needed to model the relationships in the domain that we are trying to work with. Adding new relationship types is easy; changing existing nodes and their relationships is similar to data migration, because these changes will have to be done on each node and each relationship in the existing data.
+
+
+Why choose NoSQL database
+
+To improve programmer productivity by using a database that better matches an application's needs.
+To improve data access performance via some combination of handling larger data volumes, reducing latency, and improving throughput.
+
+
+Key-value databases are generally useful for storing session information, user profiles, preferences, shopping cart data. We would avoid using Key-value databases when we need to query by data, have relationships between the data being stored or we need to operate on multiple keys at the same time.
+
+Document databases are generally useful for content management systems, blogging platforms, web analytics, real-time analytics, ecommerce-applications. We would avoid using document databases for systems that need complex transactions spanning multiple operations or queries against varying aggregate structures.
+
+Column family databases are generally useful for content management systems, blogging platforms, maintaining counters, expiring usage, heavy write volume such as log aggregation. We would avoid using column family databases for systems that are in early development, changing query patterns.
+
+
+Graph databases are very well suited to problem spaces where we have connected data, such as social networks, spatial data, routing information for goods and money, recommendation engines
+
+
+
+Schema-less ramifications
+
+Schema-less databases still need careful migration due to the implicit schema in any code that accesses the data.

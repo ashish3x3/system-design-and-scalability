@@ -1,0 +1,345 @@
+Design a Car Parking Lot.
+
+step1:Ask clarifying ques..like is this parking lot for car, truck,etc.. size of sructure..is it a mall,etc bcz deoending on location its behaviour will get added,etc..
+step2: Identify major rnttities of the system and their behaviour
+step3: Identify specialized subsets of these entities
+step4: Map the relationship between variosu entities..how did these all enties come together to form a parking lot... IS_A,HAS_A relationship
+step5 : Identify problems and refine your model. Use design patterns ewhere necessary.
+
+Is_A relationship : inheritance
+Has_A : composition
+
+
+Use inheritance when some sub types have special proporties..
+
+vehicle -- > car, truck,etc
+car --> mechnaical and electrical
+
+hashset(O(1) lookup/contains) vs tree setO((logN) lookup/contains)
+
+Interfaces:
+ only behaviour declaration and no definitions
+ public Interface Vehicle {
+ 	public String getLicensePlate();
+ 	public void move();
+ 	...
+ }
+
+ Class:
+ public class Car implements Vehicle {
+ 	public String getLicensePlate() {}
+ 	public void move(){}
+ }
+
+
+
+Major entities:
+Vehicles
+Parking Structure
+Parking Space
+
+
+Inheritance:
+Use Inheritance when some subtypes have special proprties
+Vehicel(engine,steering,start,stop,,) --> Bus, Trucy, Car ---> Electrical ,convirtibel
+
+real time impl of inheritance:
+Set<String> s = getSet();   getSet() either returns new TreeSet<String>() or new HashSet<String>()...
+both are set but former complexity is O(1) while latter is O(logN)
+
+
+
+
+parking space:
+each parking space is empty or holds a cehicle
+keeps track of time
+each space can be of regular, compact, handicaped,etc
+parking space could be 2 types --> regular space and handicaped space
+ParkingSpaceCalss --> certificatePark(vehicle) just to souble cjek right ower is taking its car and no forgery, boolean carpark(certificate), getAmount, pay(int amount)
+child class of parking spce class -- > regularClass(int hourleyrate()), HandicapedClass(int hourleyrate())
+Now we never create obkect of parent class , here parking apece each of its instance will beof one of its subclass type..so this class can be made ABSTRACT CLASS..
+now we can use interface also for parking apce class but then that menas all its child cladd==ss have to overrie all the methoda which are not related to the child class.. this sis not the case with abstract class
+
+
+Parking Structure:
+can have many levels
+provides basic functions like finding an available spot and so on
+each level has many parking spaces
+
+/* HAS_A relationship between ParkingStructure and ParkingSpace */
+Public class ParkingStructure {
+	List<Parkingspaces> availableSpaces ;
+	TowingSyatem tow;
+	HshTable<Vehicle, ParkingApace> usedSpaces;
+	public void tow(ParkingSpace) throes TowingException{}
+	public int claculatePaymnet(ParkingSpace ps) {}
+	public ParkingApace getParkingSpace ();
+	public ParkingSpace findMyParkingSpace(Vehicle v);
+}
+
+/* IS_A relationship between ParkingSpace and HandicappedParkingSpace/RegularParkingSPace */
+
+public abstract class ParkingSpace {
+	private Vehicle v;
+	private parkingStructure ps;
+	public certificate park(Vehicle v) throws ParkingException {}
+	public unpark(Certicificate c) throws ParkingException {}
+	public int getParkingFees() {}
+	public abstract int getHourleyrate();
+	public void payParkingFees(int amt) throws PaymentException {}
+
+}
+
+public class HandicappedParkingSpace extends ParkingSpace {
+	/* every extending clas will implement its own getHouleyRate*/
+	public int getHOurleyRate() {}   
+}
+
+
+
+Interface vs ABstract Class
+Abstract CLass:
+implemet common behaviour specified in interface for specilized classes(avoid duplication).. BEcause this need not to reimplemented in all those common classes separatly whi share some behaviour..
+provode skeletal implementation..like park and unpark() will be used in both regular and handicaped parking space..so writn it in abstract clas to share among all inherited clasis more better approach
+
+
+
+Interface
+As a first step to identifying behaviour of major classes
+to imforce certain behaviour.. that this has to be implemented in all sub class inherited this.. so U r inforcing certain behaviour
+
+
+public Interface AutoParkingCar {
+	public void park();
+	public void unpark();
+	public ParkingStructure getparkingStructur()
+
+}
+
+/* Now BMW,AUDI is a autoparking car .. CAR inherits from VEhicale, aurdi inherits from car but they also implemts interface for being autoparking capability..i.e imforcing to have cetain behaviour..  */
+public class BMW extends Car implements AutoParkingCar {
+	public void park()
+	publiuc void unpark() {}
+	...
+}
+
+public class AUDI extends Car implements AutoParkingCar {
+	public void park()
+	publiuc void unpark() {}
+	...
+}
+
+
+public abstract class ParkingSpace implemets AutoParkingCar {
+	public AutoParkingCar unpark(Certificate c) {}
+	public Certificate park(AutoParkingCar c) {}
+	public int abstract getHGourleyRate();
+
+}
+
+...
+ParkingSpace ps = new RegularParkingSpace();
+ps.park(bmw);
+
+/* This will be an error because Honda is not an anoParkingcar..bca only AUDI and BMZ has implemented that class.. Moreover ParkingSpace needss parameter passed to itpark should be an autoParkingCar instance.. */
+ps.park(honda);
+
+
+
+
+So first we create Interfaces to high level entities.. ParkingStructure_Interface, ParkingSpace_Interface, Vehicle_Interface
+then we create classes or abstract classes for thses entities.... ParkingStructure, ParkingSpace_abstract, 
+
+
+
+
+Some Design PAtterns:
+
+Singleton
+do we wna every car to be able to create itsd own Parking Structure or only single parking structure
+
+class ParkingStructure {
+	private static ParkingStructure ps = null;
+	
+	/* Make the constructor private */
+	private parkingStructure () {}
+
+	public staticParkingStrucure getParkingStructure() {
+		if(ps == null) {
+			ps - new ParkingStructure();
+		}
+		return ps;
+	}
+
+}
+
+How would you generilize singleton to K objects. Why would yu wnat that
+
+
+
+FActory Mathod:
+a method to create objects
+hide complex business logic
+easy mocking for test
+Necessary for singleton objects
+
+
+class ParkingStructure {
+	private ParkingStructure() {}
+
+	public static ParkingStructure getParkingStructure() throws ConstructionException {
+		if(License.publicParking()) {
+			return new PublicParkingStructure();
+		} else if(License.privateParking()) {
+			return new PrivateParkingStructure();
+		} else {
+			throw new COnstructionException();
+		}
+	}
+}
+
+
+
+Strategy Pattern
+TO provide run time impl options
+if you have lot of if else to enforce between bunch of algo for diffrent condition
+
+/* Without Strategy pattern class */
+public class ParkingStructure {
+	Enum PaymentAlgorithm algo;
+	public int calculatePayment() {
+		if(algo == WEEKDAY_ALGO) {}
+		if(algo == WEEKNED_ALGO) {}
+	}
+	
+}
+
+/* With pattern  */
+public class PArkingStructure {
+	PaymentAlgo algo;
+	public int claculatePayment(...) {
+		return algo.calculatePayment(...);
+	}
+}
+
+public class WeekdayALgorithm extends PaymentAlgorithm {
+	public int calculatePayment(...) {}
+
+}
+
+/* setting the right type of algo.. this helps in low coupling.this can be compiled separaly.. we can add extra payment option later on without chaning any other stuff.. */
+parkingStructure.setAlgorithm(new WeekdayAlgorithm());
+
+
+
+
+
+
+Task :
+Object Oriented Fridge
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

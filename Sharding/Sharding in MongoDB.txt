@@ -1,0 +1,299 @@
+https://www.youtube.com/watch?v=8q2GB3QSBSI&index=38&list=PLOqwUgCzNJcsM8qpMnw5i0MgHqu6ZV_8i
+
+Sharding in MOngoDB
+
+Durability :  w can get htis by usning write concerns param like W and J..and go the ht ejournal log
+
+Availability
+Fault Tolerance
+
+
+
+uses Fire and forgot mechnicm while doing indert nd update..we don't wait for write acknowledgement from DB
+
+get Last Error is a low level api used by mongo to retrive any error happends during last call to DB..
+
+mongo does this for ypu automatically//thats Y wnen we insert anythign asnd error happens we see some error..
+
+
+now we can set this auto call off using safe mode set to False
+safe = False..by doint this mongo app driver will not invoke getlastError after your every request to DB
+
+
+Now there are two paraeter with getLasterror(w,j)
+w = get acknowledement
+j = commit to journal
+
+if w=1 menas we are waiting fro acknowledgement but this will not be durable if any falult ahppnsd in between maonga writng to perseitendDb like netweork failure, powerc ut..
+thets y j=1 is a better approch bcz if commit s to journal..a journal is alog which maints allt eh set of opearion performdon DB, and if even any fault happesns ift can be sued to write it later to persitent storeage..
+
+
+ w     j       meaing
+ 0     0       fire and forget
+ 1     0       acknowledge
+ 1     1       commit to journal
+ 0     1	   ack and commit to journal		
+
+W and J are collectlivly called write concern.i.e how concert are U about your writ to DB .and its all controled by the drivers..
+
+Now when we say safe mode = 1 we are joing W =1 and J=0
+
+
+now before by default is the  0 0 config but now its safe mode by default..but if U r realy ocncern about your disk save recommedated is commit to journal appraoch
+
+
+
+Network errors:
+
+there is always a level of uncertainty is any netwrk relateda plcaition that your request succeed ot ot becz of netwrk errors...
+Incse of mongo app,U fierd insert with  W,J=1 but ehile mongo returning the ack, network/tcp got reset and you never recived the ack..now U r not sure whether ur reqiest succeded or not 
+
+
+
+MOngoClient is the new api which sets w=1 and j=0 by defauot..
+
+
+
+Replication
+
+
+Availability
+
+Fault Tolerance:
+	if main system goes down will be able to use our system. If the primary NOde goes down  entiraly for some reason like fire,etc ,how do we make sure tht  we dont lose  our data
+
+we use replication to overcome this
+
+thise ais a primary MongoD and others secondary Nodes with exact same replica f primary..It used async mode to sync data among replica
+
+
+now ur application will always conncet ot primary DB and in case it goes down, the other remoang nodes will contest an election to become primary and then ur app will reconnect to the new primary node..
+menwhile if original primary come up, it will rejoin as secondary..
+
+now ther are concern like do we allw reads for secondaynodes or not..
+
+this is how we get fault tolerance and availabilty in mongoDb
+
+
+and minimum no of replica required is 3... ther is no way to do elsction if less than 2 nde re there in replica when primary foes doen..
+
+
+
+Replica elections
+
+Types of Node:
+
+Regular :  thses are normal Node like primarya nds econdary nodes.those are resular nodes
+
+Arbiter: just for voting purpose.. this needed sometime if U want to have 3 nodes for voting purpose but U only have 2 system then U can add an arbiter node as 3rd node.
+
+Delayed: desater recovery Node..It is usually set to 1-2 hr behind the other Node.. it can partcipate in Voting but it can't become Primary Node..and to achive this we can set its priority to 0..
+
+Hidden Node: ofter use for Analytics and cannot become primary and priority set to 0
+
+
+
+
+write consistency
+
+Now we can write and read from primary Node from our application and that will guarnatee strong consistency w.r.t read and write.
+But in often cases we distribute read to oter secondary nodes to and in that case we may read stale dat which is not in sync with the primary Node as ther ei sno guarantee of the sync as that happens Asynchronously.
+
+we can set in in the drivers whether we want toallow read from ecndary or not 
+
+we do that for Read Scaling... it may or may not be good idea..
+
+In case of Fail over when primary goes downa dn beteren new primary is elected, there won't be any write possible..thi sis in contrast to some other tech that compete with mongoDB that supports eventual consistency ...
+Eventual Consistency :
+ it means that eventually U will be able to rewrote to new primary but there is no guarantee U will be able to do that in given time frame..
+
+MongoDB do not provide eventual consistency by default but U can confugure to read from secondrywhich wil give you eventual consistency
+
+
+
+Failover and Rollback
+
+Imagine if primary ahs some new write and before it sync them with secondary nodes, it went doen and soe oher node become primary..now the new primary will no have the write of the previous primary.
+Later on when previous primary rejoin as secondary node and try to sync with preset primary irt realizes that it has some writes whivh primary dosen't have.In sunch case it will rollabck to th present primary and write the extra data to some log which later can be applied manually.
+
+to avoid this situations:
+to set W=1 to make sure mjority of the node has that value then only return or J=1 to set it to journal before returning..
+
+
+
+bad things happen to good nodes
+
+When U read or write from primary node, it neceer chack if the connection on on or down.so sotime if is down U will get error even for read opertion..
+
+you never know ehne an exception can occur in replica set, like U r writing to primary nd it goes down , or it s down and they r selecting a new primary hile you try ot read,network error, fail over,etc..
+so it sbetter to use try cactch bloks for each of your operation even for reads..bcz th esystem may not be ready by tghe time U try to read in failover or elections
+
+momgo has a python driver specifically for this purpose.. i.e MongoReplicaSetClient
+
+
+MongoReplicaSetClient : it checks for conccrion active befor making another call ..so it remove failure..
+even with this its no guarantee to interleaving failure..it lowers down for sure..
+
+
+write concern revisited
+
+whenwe set W , it means how many node we have visit before acknowledgeing back.
+setting to W =1 means only put in primary and ack abck
+setting W=2, means setting it in primary and one of the secndary node..
+W = 'majority' ... this will wait for majoruty of nodes to get replicated from write..this helsp in preventing rollover when primary fails..
+
+Setting J =1 will wait till primary write it to all way to disk..it never eait for secondary commit to journal..only for primary node it waus to commit ofr journal
+
+now how long u wait is called Wtimeout, i.e how log U r willing to wait before your right to be ack by the secondaries... can bes et ind river
+
+W, J and wtimeout are colectively called Write Concern
+
+They can be set at 3 location
+
+1. Connectios ..like doing right now
+2. collections
+3. Replica set ...in replica set configuration
+
+
+there will be  delay in writing to all 3 as we have set J=3 and oneof the node has delay =5 in its configuration.so ther wil be 5 sec delay in printing each insert.bcz the write needs to propogate ot each of the replica
+
+rs.help() give lot of info
+
+
+
+Read preference
+
+by default U read fro primary but we can set preferences like
+
+1. primary ... alwasy read from primary
+2. secondary... alwasy read from secondary
+3. secondary prefered ... read from secondary by if no secondary read from primary
+4. primary prefered... vide versa of secondary preferred
+5. Nearest ... how close replaca is..closest one..driver pinf replca to know the location of each one of replica 				geographicaly..
+
+
+
+
+review implications of replication
+they are good for fault tolerance and greater avaivality,etc but things still can happen..
+
+Seed list : driver helps us connceting to new primary in case of failover but dreiver ned to understand atleaset one of the node from replica set in case of fail over..so we need t underatnd that driver nees to know about seed list we provided..
+write concern : W, J and wtimeout config..that is goinf to have implication on how U write ur application
+read preferences: deciding rad prefereces..bcz if U allow to read from secondary Ur application has to be ready to work with stale date to waht was actually written...
+errors  can happen : bcz of transient error, network error, failover occuring,syntatic error, DB constraint violation,etc..its alway good practice to have try cacthj to look for all thses in DB world
+
+
+What haeepn iof we set W=4 and we have 3 nodes in replica set.How log do ne need to wait..
+quite longs more than 5 min,etc bcz we have set for four ack before returning and set timeout of wtimeout to some number.it will run out of tht i.e timeout ..thst y we have to be cautious while setting thses values..
+
+
+
+Sharding:
+Appraoch to horizontal scaling..i.e scaling out
+insteadof putting your collection in one DB we put in large number of DB..
+we break up the collection into multiple logical host and we do it acc to shard key... shard key is a part of coedtion key.. kije orderId and post Id..
+
+and ther can be more that one MongoS..same like  replica set..if one goes down other will take over..its stateless..
+
+then mongo will break the collection inot chunks and decide what shard each chunk lives on besed on range based way..
+
+each shard has its own replica set
+
+we use router MongoS which helps in load balncing for shrding..
+
+we use range based appraoch and a shard key..
+
+we break the collection(order) table in chuncks and these chuncks will be migrated to oneof the sgards by the load bancer MOngoS.. and based of range
+of order Id(shard key) thses chunks will be dived into shards
+
+
+Now your application dosen;t directly ralk to MogoD instead it sends query to MongoS and it then finds the shrads based on orderId fromt eh RangeMap and route to corrct shard
+
+now if you don't send shardKey with the qiery the MongoS will send that query to althe shaed and then gathe the result back and respond back
+
+you have to inclde the shard key with each insert for mogos to know ehich shard to put
+
+and collection that arennot sharded are resides on shard 0.. by default..
+
+sharing is at the DB level..
+
+even  mongo shell concets to MogoS andnot mongoDB directly..
+
+
+If the shard key is not included in a find opeartion and there are 3 shards, each one a replica set of 3 nodes, how many nodes will see the find operation
+===== 3 and not 9 ... reason bcz each shard will go to its primary replica set by default and that the only node in re;lica it willl visit..so 3 nodes per 3 shrad.. 
+
+
+
+building a sharded environment
+
+
+we need small config server thses re littele mongo server which keep track of where the shards are..
+and they are not runingin replica set..and these are also mongoD..
+
+shard key must have a index build on it if collection exists already..else it will throw error..
+
+
+
+implications of sharding
+
+evry document includes a shard key
+shard key is immutable
+index should be build on shrad key and it should not be multi key index..only single key index
+shard key has to be specified or multi
+No shard key in doc means --scatter gather..i.e scatter to all the nodes sharda nd gathje the result abck...expensive operation
+No unique index unless its shard key.. reason being its impossibel to guarantee nbqqueness across all the shards as the key might be unique for a given hard but not as a collection of all the shardds..
+
+
+
+sharding replication
+
+sharda and replication are alwasy together..otherwise shards wont eb reliable
+mongoS has the conncetion to all the primary of the shards..so if a fialover in shards its the job of mongsS that it has to recconect to secondary ..
+Write conver is still present.. U pass W,J to mogoS an thte mongoS will pass it to the replica set of the shards nodes.. all those conept..W=2, J=1,etc..its just not direct
+
+
+
+shard key selection
+
+
+1. sufficient cardinality.. i.e if somting has only 3 possible values , monogS will no way to find ti diffcult to shard t across 100 shrds.. so it slould have suffence values set.. so we can put second part of the key indtedof primary
+
+2. hot spoting ..i.enot montotoncally increasin..like _ID i.ebson ID ..it increse greatly..i.e somthing that increse monotonically.. out of orderId, date and vendor ..vendor is a better choce bcx oterh 2 option are montonically incresning se..
+
+
+userName and albums... user name could be sued to shard... joe to one shard, mak ot anoher shard..
+
+its very hard to redo it, bcz its immutable.. so do all the analysis and access patter ,etc before cosing any shrd key..
+
+
+
+
+visible_to require multi key index,so its illegal
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
